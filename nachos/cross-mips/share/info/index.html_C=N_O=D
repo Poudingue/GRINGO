@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+ <head>
+  <title>Index of /m1info/cross-mips/share/info</title>
+ </head>
+ <body>
+<h1>Index of /m1info/cross-mips/share/info</h1>
+<table><tr><th><img src="/icons/blank.gif" alt="[ICO]"></th><th><a href="?C=N;O=A">Name</a></th><th><a href="?C=M;O=A">Last modified</a></th><th><a href="?C=S;O=A">Size</a></th><th><a href="?C=D;O=A">Description</a></th></tr><tr><th colspan="5"><hr></th></tr>
+<tr><td valign="top"><img src="/icons/back.gif" alt="[DIR]"></td><td><a href="/m1info/cross-mips/share/">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="standards.info">standards.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">219K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="stabs.info">stabs.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">179K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="ld.info">ld.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">343K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gdbint.info-2">gdbint.info-2</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 89K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gdbint.info-1">gdbint.info-1</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">292K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gdbint.info">gdbint.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">4.2K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gdb.info-6">gdb.info-6</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">229K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gdb.info-5">gdb.info-5</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">109K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gdb.info-4">gdb.info-4</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">290K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gdb.info-3">gdb.info-3</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">301K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gdb.info-2">gdb.info-2</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">294K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gdb.info-1">gdb.info-1</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">290K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gdb.info">gdb.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 16K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gccint.info">gccint.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">2.1M</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gccinstall.info">gccinstall.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">192K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="gcc.info">gcc.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">1.9M</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="cppinternals.info">cppinternals.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 49K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="cpp.info">cpp.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">229K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="configure.info">configure.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">114K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="binutils.info">binutils.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">178K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="bfd.info">bfd.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">480K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="as.info">as.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">852K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="annotate.info">annotate.info</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 48K</td><td>&nbsp;</td></tr>
+<tr><th colspan="5"><hr></th></tr>
+</table>
+</body></html>
