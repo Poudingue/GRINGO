@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+ <head>
+  <title>Index of /m1info/cross-mips/mips/lib</title>
+ </head>
+ <body>
+<h1>Index of /m1info/cross-mips/mips/lib</h1>
+<table><tr><th><img src="/icons/blank.gif" alt="[ICO]"></th><th><a href="?C=N;O=A">Name</a></th><th><a href="?C=M;O=A">Last modified</a></th><th><a href="?C=S;O=D">Size</a></th><th><a href="?C=D;O=A">Description</a></th></tr><tr><th colspan="5"><hr></th></tr>
+<tr><td valign="top"><img src="/icons/back.gif" alt="[DIR]"></td><td><a href="/m1info/cross-mips/mips/">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/folder.gif" alt="[DIR]"></td><td><a href="ldscripts/">ldscripts/</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">  - </td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="libsupc++.la">libsupc++.la</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">907 </td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="libstdc++.la">libstdc++.la</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">912 </td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="libssp.la">libssp.la</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">1.0K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="libssp_nonshared.la">libssp_nonshared.la</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">1.0K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="idtecoff.ld">idtecoff.ld</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">2.0K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="libstdc++.a-gdb.py">libstdc++.a-gdb.py</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">2.3K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="crt0_cfe.o">crt0_cfe.o</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">2.6K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libssp_nonshared.a">libssp_nonshared.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">2.7K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="crt0.o">crt0.o</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">2.9K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="lsi.ld">lsi.ld</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">2.9K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="pcrt0.o">pcrt0.o</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">3.1K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="ddb-kseg0.ld">ddb-kseg0.ld</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">3.9K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="ddb.ld">ddb.ld</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">3.9K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="cfe.ld">cfe.ld</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">4.0K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="pmon.ld">pmon.ld</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">4.5K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="nullmon.ld">nullmon.ld</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">4.5K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/text.gif" alt="[TXT]"></td><td><a href="idt.ld">idt.ld</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">4.6K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libidt.a">libidt.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 48K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libpmon.a">libpmon.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 49K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="liblsi.a">liblsi.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 49K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libnullmon.a">libnullmon.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 49K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libssp.a">libssp.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 53K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libnosys.a">libnosys.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 82K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libcfe.a">libcfe.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right"> 90K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libsupc++.a">libsupc++.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">599K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libiberty.a">libiberty.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">888K</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libm.a">libm.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">1.3M</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libc.a">libc.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">3.8M</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libg.a">libg.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">3.8M</td><td>&nbsp;</td></tr>
+<tr><td valign="top"><img src="/icons/unknown.gif" alt="[   ]"></td><td><a href="libstdc++.a">libstdc++.a</a></td><td align="right">19-Jan-2018 17:17  </td><td align="right">8.4M</td><td>&nbsp;</td></tr>
+<tr><th colspan="5"><hr></th></tr>
+</table>
+</body></html>
