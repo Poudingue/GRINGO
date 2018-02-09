@@ -87,6 +87,7 @@ Semaphore::P() {
    this.value--;
    SetStatus(lastStatus);
   printf("**** Warning: method Semaphore::P is not correct yet i think so please be carefull\n");
+  //TODODO
 
   exit(-1);
 }
@@ -100,11 +101,24 @@ Semaphore::P() {
 //	are disabled when it is called.
 */
 //----------------------------------------------------------------------
+#ifndef ETUDIANTS_TP
 void
 Semaphore::V() {
-   printf("**** Warning: method Semaphore::V is not implemented yet\n");
-    exit(-1);
+  printf("**** Warning: method Semaphore::P is not implemented yet\n");
+  exit(-1);
 }
+#endif
+#ifdef ETUDIANTS_TP
+Semaphore::P() {
+   IntStatus lastStatus = SetStatus (INTERRUPTS_OFF);
+   this.value++;
+   SetStatus(lastStatus);
+  printf("**** Warning: method Semaphore::P is not correct yet i think so please be carefull\n");
+  //TODODO
+
+  exit(-1);
+}
+#endif
 
 //----------------------------------------------------------------------
 // Lock::Lock
@@ -147,10 +161,19 @@ Lock::~Lock() {
 //	when it is called.
 */
 //----------------------------------------------------------------------
+#ifndef ETUDIANTS_TP
 void Lock::Acquire() {
    printf("**** Warning: method Lock::Acquire is not implemented yet\n");
     exit(-1);
 }
+#endif
+#ifdef ETUDIANTS_TP
+void Lock::Acquire(){
+   //TODODO faire l'attente de lock free
+  free = false;
+  owner = ;
+}
+#endif
 
 //----------------------------------------------------------------------
 // Lock::Release
@@ -161,10 +184,19 @@ void Lock::Acquire() {
 //	are disabled when it is called.
 */
 //----------------------------------------------------------------------
+#ifndef ETUDIANTS_TP
 void Lock::Release() {
     printf("**** Warning: method Lock::Release is not implemented yet\n");
     exit(-1);
 }
+#endif
+#ifdef ETUDIANTS_TP
+void Lock::Release(){
+   //TODODO check le lock par current thread
+  free = true;
+  owner = NULL;
+}
+#endif
 
 //----------------------------------------------------------------------
 // Lock::isHeldByCurrentThread
