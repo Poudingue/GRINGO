@@ -1,0 +1,6 @@
+#ifndef ETUDIANTS_TP
+//Vieux code
+#endif
+#ifdef ETUDIANTS_TP
+//Nouveau code
+#endif
