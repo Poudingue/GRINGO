@@ -85,14 +85,9 @@ Semaphore::P() {
 Semaphore::P() {
    IntStatus lastStatus = SetStatus (INTERRUPTS_OFF); //disable interrupt
    this.value--;
-   while (this.value <0){
-      this.Sleep();
-   }
+   this.Sleep();
    SetStatus(lastStatus);
-  printf("**** Warning: method Semaphore::P is not correct yet i think so please be carefull\n");
-  //TODODO
-
-  exit(-1);
+   exit(-1);
 }
 #endif
 
@@ -117,10 +112,7 @@ Semaphore::V() {
    this.value++;
    this.ReadyToRun();
    SetStatus(lastStatus);
-  printf("**** Warning: method Semaphore::V is not correct yet i think so please be carefull\n");
-  //TODODO
-
-  exit(-1);
+   exit(-1);
 }
 #endif
 
