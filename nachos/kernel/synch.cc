@@ -86,34 +86,8 @@ Semaphore::P() {
    IntStatus lastStatus = SetStatus (INTERRUPTS_OFF); //disable interrupt
    this.value--;
    while (this.value <0){
+      this.Sleep();
    }
-   SetStatus(lastStatus);
-  printf("**** Warning: method Semaphore::P is not correct yet i think so please be carefull\n");
-  //TODODO
-
-  exit(-1);
-}
-#endif
-
-//----------------------------------------------------------------------
-// Semaphore::V
-/*! 	Increment semaphore value, waking up a waiting thread if any.
-//	As with P(), this operation must be atomic, so we need to disable
-//	interrupts.  Scheduler::ReadyToRun() assumes that interrupts
-//	are disabled when it is called.
-*/
-//----------------------------------------------------------------------
-#ifndef ETUDIANTS_TP
-void
-Semaphore::V() {
-  printf("**** Warning: method Semaphore::P is not implemented yet\n");
-  exit(-1);
-}
-#endif
-#ifdef ETUDIANTS_TP
-Semaphore::P() {
-   IntStatus lastStatus = SetStatus (INTERRUPTS_OFF);
-   this.value++;
    SetStatus(lastStatus);
   printf("**** Warning: method Semaphore::P is not correct yet i think so please be carefull\n");
   //TODODO
