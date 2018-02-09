@@ -242,10 +242,21 @@ Condition::~Condition() {
 //  This operation must be atomic, so we need to disable interrupts.
 */
 //----------------------------------------------------------------------
+
+#ifndef ETUDIANTS_TP
 void Condition::Wait() {
     printf("**** Warning: method Condition::Wait is not implemented yet\n");
     exit(-1);
 }
+#endif
+#ifdef ETUDIANTS_TP
+void Condition::Wait() {
+    waitqueue->Append((void *) this);
+    printf("**** TODODO : test. sans doute des choses à ajouter\n");
+    exit(-1);
+}
+#endif
+
 
 //----------------------------------------------------------------------
 // Condition::Signal
