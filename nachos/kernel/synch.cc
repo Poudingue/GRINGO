@@ -112,9 +112,10 @@ Semaphore::V() {
 }
 #endif
 #ifdef ETUDIANTS_TP
-Semaphore::P() {
+Semaphore::V() {
    IntStatus lastStatus = SetStatus (INTERRUPTS_OFF);
    this.value++;
+   this.ReadyToRun();
    SetStatus(lastStatus);
   printf("**** Warning: method Semaphore::V is not correct yet i think so please be carefull\n");
   //TODODO
