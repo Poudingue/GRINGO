@@ -83,8 +83,10 @@ Semaphore::P() {
 #endif
 #ifdef ETUDIANTS_TP
 Semaphore::P() {
-   IntStatus lastStatus = SetStatus (INTERRUPTS_OFF);
+   IntStatus lastStatus = SetStatus (INTERRUPTS_OFF); //disable interrupt
    this.value--;
+   while (this.value <0){
+   }
    SetStatus(lastStatus);
   printf("**** Warning: method Semaphore::P is not correct yet i think so please be carefull\n");
 
