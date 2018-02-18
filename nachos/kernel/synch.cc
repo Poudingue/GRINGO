@@ -82,11 +82,12 @@ Semaphore::P() {
 }
 #endif
 #ifdef ETUDIANTS_TP
+void
 Semaphore::P() {
-   IntStatus lastStatus = SetStatus (INTERRUPTS_OFF); //disable interrupt
-   this.value--;
-   this.Sleep();
-   SetStatus(lastStatus);
+   IntStatus lastStatus = g_machine->interrupt->SetStatus (INTERRUPTS_OFF); //disable interrupt
+   this->value--;
+   this->Sleep();
+   g_machine->interrupt->SetStatus(lastStatus);
    exit(-1);
 }
 #endif
@@ -107,11 +108,12 @@ Semaphore::V() {
 }
 #endif
 #ifdef ETUDIANTS_TP
+void
 Semaphore::V() {
-   IntStatus lastStatus = SetStatus (INTERRUPTS_OFF);
+   IntStatus lastStatus = g_machine->interrupt->SetStatus (INTERRUPTS_OFF);
    this.value++;
    this.ReadyToRun();
-   SetStatus(lastStatus);
+   g_machine->interrupt->SetStatus(lastStatus);
    exit(-1);
 }
 #endif
@@ -257,10 +259,25 @@ void Condition::Wait() {
 // This operation must be atomic, so we need to disable interrupts.
 */
 //----------------------------------------------------------------------
+#ifndef ETUDIANTS_TP
 void Condition::Signal() {
     printf("**** Warning: method Condition::Signal is not implemented yet\n");
     exit(-1);
 }
+#endif
+#ifdef ETUDIANTS_TP
+void Condition::Signal() {
+    g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+    printf("**** Warning: method Condition::Signal is hardly implemented yet\n");
+    Thread *temp = (Thread *) waitqueue->Remove();
+    if (temp == NULL){
+      //TODODO
+    }
+    g_machine->interrupt->SetStatus(INTERRUPTS_ON);
+    exit(-1);
+}
+#endif
+
 
 //----------------------------------------------------------------------
 /*! Condition::Broadcast
