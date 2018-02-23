@@ -84,11 +84,14 @@ Semaphore::P() {
 #ifdef ETUDIANTS_TP
 void
 Semaphore::P() {
-   IntStatus lastStatus = g_machine->interrupt->SetStatus (INTERRUPTS_OFF); //disable interrupt
-   this->value--;
-   this->Sleep();
-   g_machine->interrupt->SetStatus(lastStatus);
-   exit(-1);
+  IntStatus lastStatus = g_machine->interrupt->SetStatus (INTERRUPTS_OFF); //disable interrupt
+  this->value--;
+  if (this->value < 0){
+    queue->Append((void *) g_current_thread);
+    g_current_thread->Sleep();
+  }
+  g_machine->interrupt->SetStatus(lastStatus);
+  //exit(-1);
 }
 #endif
 
@@ -111,10 +114,10 @@ Semaphore::V() {
 void
 Semaphore::V() {
    IntStatus lastStatus = g_machine->interrupt->SetStatus (INTERRUPTS_OFF);
-   this.value++;
-   this.ReadyToRun();
+   this->value++;
+   g_scheduler->ReadyToRun((Thread *) queue->Remove()); //TODODO: is it correct ?
    g_machine->interrupt->SetStatus(lastStatus);
-   exit(-1);
+   //exit(-1);
 }
 #endif
 
@@ -167,9 +170,15 @@ void Lock::Acquire() {
 #endif
 #ifdef ETUDIANTS_TP
 void Lock::Acquire(){
-   //TODODO faire l'attente de lock free
+  IntStatus oldstatus = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
   free = false;
-  owner = ;
+  if (free != true){
+    sleepqueue->Append(g_current_thread);
+    g_current_thread->Sleep();
+  }
+   //TODODO faire l'attente de lock free
+  owner = g_current_thread;
+  g_machine->interrupt->SetStatus(oldstatus);
 }
 #endif
 
@@ -190,9 +199,17 @@ void Lock::Release() {
 #endif
 #ifdef ETUDIANTS_TP
 void Lock::Release(){
-   //TODODO check le lock par current thread
-  free = true;
-  owner = NULL;
+  IntStatus lastStatus = g_machine->interrupt->SetStatus (INTERRUPTS_OFF);
+  Thread * temp = (Thread *) sleepqueue->Remove();
+  if (isHeldByCurrentThread()){
+    free = true;
+    g_scheduler->ReadyToRun(temp);
+  } else {
+    DEBUG('s', (char *)"isHeldByCurrentThread failed in synch.cc");
+    exit(-1);
+  }
+  g_machine->interrupt->SetStatus(lastStatus);
+  //exit(-1);
 }
 #endif
 
@@ -245,9 +262,13 @@ void Condition::Wait() {
 #endif
 #ifdef ETUDIANTS_TP
 void Condition::Wait() {
-    waitqueue->Append((void *) this);
-    printf("**** TODODO : test. sans doute des choses à ajouter\n");
-    exit(-1);
+  IntStatus lastatus = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+  waitqueue->Append((void *) this);
+
+  //TODODO : test. sans doute des choses à ajouter
+  g_machine->interrupt->SetStatus(lastatus);
+  //exit(-1);
+
 }
 #endif
 
@@ -267,14 +288,15 @@ void Condition::Signal() {
 #endif
 #ifdef ETUDIANTS_TP
 void Condition::Signal() {
-    g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
-    printf("**** Warning: method Condition::Signal is hardly implemented yet\n");
-    Thread *temp = (Thread *) waitqueue->Remove();
-    if (temp == NULL){
-      //TODODO
-    }
-    g_machine->interrupt->SetStatus(INTERRUPTS_ON);
-    exit(-1);
+  g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+  //TODODO: check if it works
+  Thread *temp = (Thread *) waitqueue->Remove();
+  if (temp == NULL){
+    DEBUG('s', (char *) "");
+  }
+  g_scheduler->ReadyToRun(temp);
+  g_machine->interrupt->SetStatus(INTERRUPTS_ON);
+  //exit(-1);
 }
 #endif
 
@@ -285,7 +307,23 @@ void Condition::Signal() {
 // This operation must be atomic, so we need to disable interrupts.
 */
 //----------------------------------------------------------------------
+#ifndef ETUDIANTS_TP
 void Condition::Broadcast() {
   printf("**** Warning: method Condition::Broadcast is not implemented yet\n");
   exit(-1);
 }
+#endif
+#ifdef ETUDIANTS_TP
+void Condition::Broadcast() {
+  g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+  while (!waitqueue->IsEmpty()){
+    Thread *temp = (Thread *) waitqueue->Remove();
+    if (temp == NULL){
+      DEBUG('s', (char *) "");
+    }
+    g_scheduler->ReadyToRun(temp);
+  }
+  g_machine->interrupt->SetStatus(INTERRUPTS_ON);
+  //exit(-1);
+}
+#endif
