@@ -1,23 +1,23 @@
- /*! \file exception.cc
- //  \brief Entry point into the Nachos kernel .
- //
- //    There are two kinds of things that can cause control to
- //    transfer back to here:
- //
- //    syscall -- The user code explicitly requests to call a Nachos
- //    system call
- //
- //    exceptions -- The user code does something that the CPU can't handle.
- //    For instance, accessing memory that doesn't exist, arithmetic errors,
- //    etc.
- //
- //    Interrupts (which can also cause control to transfer from user
- //    code into the Nachos kernel) are handled elsewhere.
- */
- // Copyright (c) 1992-1993 The Regents of the University of California.
- // All rights reserved.  See copyright.h for copyright notice and limitation
+/*! \file exception.cc
+//  \brief Entry point into the Nachos kernel .
+//
+//    There are two kinds of things that can cause control to
+//    transfer back to here:
+//
+//    syscall -- The user code explicitly requests to call a Nachos
+//    system call
+//
+//    exceptions -- The user code does something that the CPU can't handle.
+//    For instance, accessing memory that doesn't exist, arithmetic errors,
+//    etc.
+//
+//    Interrupts (which can also cause control to transfer from user
+//    code into the Nachos kernel) are handled elsewhere.
+*/
+// Copyright (c) 1992-1993 The Regents of the University of California.
+// All rights reserved.  See copyright.h for copyright notice and limitation
 
- // of liability and disclaimer of warranty provisions.
+// of liability and disclaimer of warranty provisions.
 
 #include "machine/machine.h"
 #include "kernel/msgerror.h"
@@ -38,16 +38,16 @@
 // \param addr is the memory address of the string */
 //----------------------------------------------------------------------
 static int GetLengthParam(int addr) {
-   int i=0;
-   uint32_t c=-1;
+    int i=0;
+    uint32_t c=-1;
 
-   // Scan the string until the null character is found
-   while (c != 0) {
-     g_machine->mmu->ReadMem(addr++,1,&c,false);
-     i++;
-   }
-   return i+1;
- }
+    // Scan the string until the null character is found
+    while (c != 0) {
+        g_machine->mmu->ReadMem(addr++,1,&c,false);
+        i++;
+    }
+    return i+1;
+}
 
 //----------------------------------------------------------------------
 // GetStringParam
@@ -60,51 +60,49 @@ static int GetLengthParam(int addr) {
 */
 //----------------------------------------------------------------------
 static void GetStringParam(int addr,char *dest,int maxlen) {
-   int i=0;
-   uint32_t c=-1;
+    int i=0;
+    uint32_t c=-1;
 
-   while ((c != 0) && (i < maxlen)) {
-     // Read a character from the machine memory
-     g_machine->mmu->ReadMem(addr++,1,&c,false);
-     // Put it in the kernel memory
-     dest[i++] = (char)c;
-   }
-   // Force a \0 at the end
-   dest[maxlen-1]='\0';
- }
+    while ((c != 0) && (i < maxlen)) {
+        // Read a character from the machine memory
+        g_machine->mmu->ReadMem(addr++,1,&c,false);
+        // Put it in the kernel memory
+        dest[i++] = (char)c;
+    }
+    // Force a \0 at the end
+    dest[maxlen-1]='\0';
+}
 
- //----------------------------------------------------------------------
- // ExceptionHandler
- /*!   Entry point into the Nachos kernel.  Called when a user program
- //    is executing, and either does a syscall, or generates an addressing
- //    or arithmetic exception.
- //
- //    For system calls, the calling convention is the following:
- //
- //    - system call identifier -- r2
- //    - arg1 -- r4
- //    - arg2 -- r5
- //    - arg3 -- r6
- //    - arg4 -- r7
- //
- //    The result of the system call, if any, must be put back into r2.
- //
- //    \param exceptiontype is the kind of exception.
- //           The list of possible exception are defined in machine.h.
- //    \param vaddr is the address that causes the exception to occur
- //           (when used)
- */
- //----------------------------------------------------------------------
-void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
-{
+//----------------------------------------------------------------------
+// ExceptionHandler
+/*!   Entry point into the Nachos kernel.  Called when a user program
+//    is executing, and either does a syscall, or generates an addressing
+//    or arithmetic exception.
+//
+//    For system calls, the calling convention is the following:
+//
+//    - system call identifier -- r2
+//    - arg1 -- r4
+//    - arg2 -- r5
+//    - arg3 -- r6
+//    - arg4 -- r7
+//
+//    The result of the system call, if any, must be put back into r2.
+//
+//    \param exceptiontype is the kind of exception.
+//           The list of possible exception are defined in machine.h.
+//    \param vaddr is the address that causes the exception to occur
+//           (when used)
+*/
+//----------------------------------------------------------------------
+void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
+    // Get the content of the r2 register (system call number in case
+    // of a system call
+    int type = g_machine->ReadIntRegister(2);
 
-  // Get the content of the r2 register (system call number in case
-  // of a system call
-  int type = g_machine->ReadIntRegister(2);
+    switch (exceptiontype) {
 
-  switch (exceptiontype) {
-
-  case NO_EXCEPTION:
+    case NO_EXCEPTION:
     printf("Nachos internal error, a NoException exception is raised ...\n");
     g_machine->interrupt->Halt(0);
     break;
@@ -114,168 +112,159 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
     // -------------
     switch(type) {
 
-	char msg[MAXSTRLEN]; // Argument for the PError system call
+        char msg[MAXSTRLEN]; // Argument for the PError system call
+        // You will find below all Nachos system calls ...
+    case SC_HALT:
+    // The halt system call. Stops Nachos.
+    DEBUG('e', (char*)"Shutdown, initiated by user program.\n");
+    g_machine->interrupt->Halt(0);
+    g_syscall_error->SetMsg((char*)"",NO_ERROR);
+    return;
 
-	// You will find below all Nachos system calls ...
+    case SC_SYS_TIME: {
+        // The systime system call. Gets the system time
+        DEBUG('e', (char*)"Systime call, initiated by user program.\n");
+        int addr=g_machine->ReadIntRegister(4);
+        uint64_t tick = g_stats->getTotalTicks();
+        uint32_t seconds = (uint32_t)
+        cycle_to_sec(tick,g_cfg->ProcessorFrequency);
+        uint32_t nanos =  (uint32_t)
+        cycle_to_nano(tick,g_cfg->ProcessorFrequency);
+        g_machine->mmu->WriteMem(addr,sizeof(uint32_t),seconds);
+        g_machine->mmu->WriteMem(addr+4,sizeof(uint32_t),nanos);
+        g_syscall_error->SetMsg((char*)"",NO_ERROR);
+        break;
+    }
 
-	case SC_HALT:
-	  // The halt system call. Stops Nachos.
-	  DEBUG('e', (char*)"Shutdown, initiated by user program.\n");
-	  g_machine->interrupt->Halt(0);
-	  g_syscall_error->SetMsg((char*)"",NO_ERROR);
-	  return;
+    case SC_EXIT:{
+        // The exit system call
+        // Ends the calling thread
+        DEBUG('e', (char*)"Thread 0x%x %s exit call.\n", g_current_thread,g_current_thread->GetName());
+        ASSERT(g_current_thread->type == THREAD_TYPE);
+        g_current_thread->Finish();
+        break;
+    }
 
-	case SC_SYS_TIME: {
-	  // The systime system call. Gets the system time
-	  DEBUG('e', (char*)"Systime call, initiated by user program.\n");
-	  int addr=g_machine->ReadIntRegister(4);
-	  uint64_t tick = g_stats->getTotalTicks();
-	  uint32_t seconds = (uint32_t)
-	    cycle_to_sec(tick,g_cfg->ProcessorFrequency);
-	  uint32_t nanos =  (uint32_t)
-	    cycle_to_nano(tick,g_cfg->ProcessorFrequency);
-	  g_machine->mmu->WriteMem(addr,sizeof(uint32_t),seconds);
-	  g_machine->mmu->WriteMem(addr+4,sizeof(uint32_t),nanos);
-	  g_syscall_error->SetMsg((char*)"",NO_ERROR);
-	  break;
-	}
+    case SC_EXEC: {
+        // The exec system call
+        // Creates a new process (thread+address space)
+        DEBUG('e', (char*)"Process: Exec call.\n");
+        int addr;
+        int size;
+        char name[MAXSTRLEN];
+        int error=NO_ERROR;
 
-	case SC_EXIT:{
-          // The exit system call
-	  // Ends the calling thread
-	  DEBUG('e', (char*)"Thread 0x%x %s exit call.\n", g_current_thread,g_current_thread->GetName());
-	  ASSERT(g_current_thread->type == THREAD_TYPE);
-	  g_current_thread->Finish();
-	  break;
+        // Get the process name
+        addr = g_machine->ReadIntRegister(4);
+        size = GetLengthParam(addr);
+        char ch[size];
+        GetStringParam(addr,ch,size);
+        sprintf(name,"master thread of process %s",ch);
+        Process * p = new Process(ch, &error);
+        if (error != NO_ERROR) {
+            g_machine->WriteIntRegister(2,ERROR);
+            if (error == OUT_OF_MEMORY)
+                g_syscall_error->SetMsg((char*)"",error);
+            else
+                g_syscall_error->SetMsg(ch,error);
+            break;
         }
-
-        case SC_EXEC: {
-          // The exec system call
-          // Creates a new process (thread+address space)
-          DEBUG('e', (char*)"Process: Exec call.\n");
-	  int addr;
-          int size;
-	  char name[MAXSTRLEN];
-	  int error=NO_ERROR;
-
-	  // Get the process name
-          addr = g_machine->ReadIntRegister(4);
-          size = GetLengthParam(addr);
-          char ch[size];
-	  GetStringParam(addr,ch,size);
-	  sprintf(name,"master thread of process %s",ch);
-	  Process * p = new Process(ch, &error);
-	  if (error != NO_ERROR) {
-	    g_machine->WriteIntRegister(2,ERROR);
-	    if (error == OUT_OF_MEMORY)
-	      g_syscall_error->SetMsg((char*)"",error);
-	    else
-	      g_syscall_error->SetMsg(ch,error);
-	    break;
-	  }
-	  Thread *ptThread = new Thread(name);
-	  int32_t tid = g_object_ids->AddObject(ptThread);
-	  error = ptThread->Start(p,
-				  p->addrspace->getCodeStartAddress(),
-				  -1);
-	  if (error != NO_ERROR) {
-	    g_machine->WriteIntRegister(2,ERROR);
-	    if (error == OUT_OF_MEMORY)
-	      g_syscall_error->SetMsg((char*)"",error);
-	    else
-	      g_syscall_error->SetMsg(name,error);
-	    break;
-	  }
-	  g_syscall_error->SetMsg((char*)"",NO_ERROR);
-	  g_machine->WriteIntRegister(2,tid);
-	  break;
+        Thread *ptThread = new Thread(name);
+        int32_t tid = g_object_ids->AddObject(ptThread);
+        error = ptThread->Start(p, p->addrspace->getCodeStartAddress(), -1);
+        if (error != NO_ERROR) {
+            g_machine->WriteIntRegister(2,ERROR);
+            if (error == OUT_OF_MEMORY)
+                g_syscall_error->SetMsg((char*)"",error);
+            else
+                g_syscall_error->SetMsg(name,error);
+            break;
         }
+        g_syscall_error->SetMsg((char*)"",NO_ERROR);
+        g_machine->WriteIntRegister(2,tid);
+        break;
+    }
 
-	case SC_NEW_THREAD: {
-	  // The newThread system call
-	  // Create a new thread in the same address space
-	  DEBUG('e', (char*)"Multithread: NewThread call.\n");
-	  Thread *ptThread;
-	  int name_addr;
-	  int32_t fun;
-	  int arg;
-	  int err=NO_ERROR;
-	  // Get the address of the string for the name of the thread
-	  name_addr = g_machine->ReadIntRegister(4);
-	  // Get the pointer to the function to be executed by the new thread
-	  fun = g_machine->ReadIntRegister(5);
-	  // Get the function parameters
-	  arg = g_machine->ReadIntRegister(6);
-	  // Build the name of the thread
-	  int size = GetLengthParam(name_addr);
-	  char thr_name[size];
-	  GetStringParam(name_addr, thr_name, size);
-	  //char *proc_name = g_current_thread->getProcessOwner()->getName();
-	  // Finally start it
-	  ptThread = new Thread(thr_name);
-	  int32_t tid;
-	  tid = g_object_ids->AddObject(ptThread);
-	  err = ptThread->Start(g_current_thread->GetProcessOwner(),
-				fun, arg);
-	  if (err != NO_ERROR) {
-	    g_machine->WriteIntRegister(2,ERROR);
-	    g_syscall_error->SetMsg((char*)"",err);
-	  }
-	  else {
-	    g_machine->WriteIntRegister(2,tid);
-	    g_syscall_error->SetMsg((char*)"",NO_ERROR);
-	  }
-	  break;
-	}
-
-        case SC_JOIN: {
-	  // The join system call
-          // Wait for the thread idThread to finish
-          DEBUG('e', (char*)"Process or thread: Join call.\n");
-	  int32_t tid;
-          Thread* ptThread;
-	  tid = g_machine->ReadIntRegister(4);
-	  ptThread = (Thread *)g_object_ids->SearchObject(tid);
-	  if (ptThread
-	      && ptThread->type == THREAD_TYPE)
-	    {
-	      g_current_thread->Join(ptThread);
-	      g_syscall_error->SetMsg((char*)"",NO_ERROR);
-	      g_machine->WriteIntRegister(2,0);
-	    }
-	  else
-	    // Thread already terminated (type set to INVALID_TYPE) or call on an object
-	    // that is not a thread
-	    // Exit with no error code since we cannot separate the two cases
-	    {
-	      g_syscall_error->SetMsg((char*)"",NO_ERROR);
-	      g_machine->WriteIntRegister(2,0);
-	    }
-	  DEBUG('e',(char*)"Fin Join");
-	  break;
+    case SC_NEW_THREAD: {
+        // The newThread system call
+        // Create a new thread in the same address space
+        DEBUG('e', (char*)"Multithread: NewThread call.\n");
+        Thread *ptThread;
+        int name_addr;
+        int32_t fun;
+        int arg;
+        int err=NO_ERROR;
+        // Get the address of the string for the name of the thread
+        name_addr = g_machine->ReadIntRegister(4);
+        // Get the pointer to the function to be executed by the new thread
+        fun = g_machine->ReadIntRegister(5);
+        // Get the function parameters
+        arg = g_machine->ReadIntRegister(6);
+        // Build the name of the thread
+        int size = GetLengthParam(name_addr);
+        char thr_name[size];
+        GetStringParam(name_addr, thr_name, size);
+        //char *proc_name = g_current_thread->getProcessOwner()->getName();
+        // Finally start it
+        ptThread = new Thread(thr_name);
+        int32_t tid;
+        tid = g_object_ids->AddObject(ptThread);
+        err = ptThread->Start(g_current_thread->GetProcessOwner(), fun, arg);
+        if (err != NO_ERROR) {
+            g_machine->WriteIntRegister(2,ERROR);
+            g_syscall_error->SetMsg((char*)"",err);
+        } else {
+            g_machine->WriteIntRegister(2,tid);
+            g_syscall_error->SetMsg((char*)"",NO_ERROR);
         }
+        break;
+    }
 
-	case SC_YIELD: {
-	  DEBUG('e', (char*)"Process or thread: Yield call.\n");
-	  ASSERT(g_current_thread->type == THREAD_TYPE);
-	  g_current_thread->Yield();
-	  g_syscall_error->SetMsg((char*)"",NO_ERROR);
-	  break;
-	}
+    case SC_JOIN: {
+        // The join system call
+        // Wait for the thread idThread to finish
+        DEBUG('e', (char*)"Process or thread: Join call.\n");
+        int32_t tid;
+        Thread* ptThread;
+        tid = g_machine->ReadIntRegister(4);
+        ptThread = (Thread *)g_object_ids->SearchObject(tid);
+        if (ptThread && ptThread->type == THREAD_TYPE) {
+            g_current_thread->Join(ptThread);
+            g_syscall_error->SetMsg((char*)"",NO_ERROR);
+            g_machine->WriteIntRegister(2,0);
+        } else
+        // Thread already terminated (type set to INVALID_TYPE) or call on an object
+        // that is not a thread
+        // Exit with no error code since we cannot separate the two cases
+        {
+            g_syscall_error->SetMsg((char*)"",NO_ERROR);
+            g_machine->WriteIntRegister(2,0);
+        }
+        DEBUG('e',(char*)"Fin Join");
+        break;
+    }
 
-	case SC_PERROR: {
-	  // the PError system call
-	  // print the last error message
-	  DEBUG('e', (char*)"Debug: Perror call.\n");
-	  int size;
-	  int addr;
-	  addr = g_machine->ReadIntRegister(4);
-	  size = GetLengthParam(addr);
-	  char ch[size];
-	  GetStringParam(addr,ch,size);
-	  g_syscall_error->PrintLastMsg(g_console_driver,ch);
-	  break;
-	}
+    case SC_YIELD: {
+        DEBUG('e', (char*)"Process or thread: Yield call.\n");
+        ASSERT(g_current_thread->type == THREAD_TYPE);
+        g_current_thread->Yield();
+        g_syscall_error->SetMsg((char*)"",NO_ERROR);
+        break;
+    }
+
+    case SC_PERROR: {
+        // the PError system call
+        // print the last error message
+        DEBUG('e', (char*)"Debug: Perror call.\n");
+        int size;
+        int addr;
+        addr = g_machine->ReadIntRegister(4);
+        size = GetLengthParam(addr);
+        char ch[size];
+        GetStringParam(addr,ch,size);
+        g_syscall_error->PrintLastMsg(g_console_driver,ch);
+        break;
+    }
 
     #ifdef ETUDIANTS_TP
     //nous rajoutons nos gestions d'exception ici
@@ -283,76 +272,172 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
         //on doit récuperer l'id du thread (CF les arguments de P() page 32)
         //on doit retourner 0 si tout va bien.
         DEBUG('e', (char*)"Process or thread: P call.\n");
-        int32_t tid;
+        int32_t semId;
         Semaphore* ptSema;
-        sid = g_machine->ReadIntRegister(4); //on lit l'id du Sema
-        ptSema = (Semaphore *)g_object_ids->SearchObject(sid); //on regarde si le Sema existe
+        semId = g_machine->ReadIntRegister(4); //on lit l'id du Sema
+        ptSema = (Semaphore *)g_object_ids->SearchObject(semId); //on regarde si le Sema existe
         if (ptSema && ptSema->type == SEMAPHORE_TYPE) //si l'objet récup de r4: on vérifie qu'il ne soit pas NULL ET qu'il soit du bon type
         {
             ptSema->P();
-            g_machine->WriteIntRegister(2,0); //tout s'est bien déroulé, on renvoit 0 dans le registre 2.
+            g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien déroulé, on renvoit 0 dans le registre 2.
         } else {
-            g_syscall_error->SetMsg((char*)"",NO_ERROR);
-            g_machine->WriteIntRegister(2,666); //TODODO: trouver la bonne valeur de retour dans les fichiers d'inclusions!!!
+            g_syscall_error->SetMsg((char*)"impossible de resoudre P() dans la routine d'exception",ERROR); //définit à -1 dans kernel/msgerror.h
+            g_machine->WriteIntRegister(2,ERROR);
         }
         DEBUG('e',(char*)"Fin P");
         break;
     }
     case SC_V:{
-      //on doit récuperer l'id du thread (CF les arguments de V() page 32)
-      //on doit retourner 0 si tout va bien.
-      DEBUG('e', (char*)"Process or thread: V call.\n");
-      int32_t tid;
-      Semaphore* ptSema;
-      sid = g_machine->ReadIntRegister(4); //on lit l'id du Sema
-      ptSema = (Semaphore *)g_object_ids->SearchObject(sid); //on regarde si le Sema existe
-      if (ptSema && ptSema->type == SEMAPHORE_TYPE) //si l'objet récup de r4: on vérifie qu'il ne soit pas NULL ET qu'il soit du bon type
-      {
-          ptSema->V();
-          g_machine->WriteIntRegister(2,0); //tout s'est bien déroulé, on renvoit 0 dans le registre 2.
-      } else {
-          g_syscall_error->SetMsg((char*)"",NO_ERROR);
-          //g_machine->WriteIntRegister(2,1); //TODODO: faut-il renvoyer une valeur d'erreur ?
-      }
-      DEBUG('e',(char*)"Fin V");
-      break;
+        //on doit récuperer l'id du thread (CF les arguments de V() page 32)
+        //on doit retourner 0 si tout va bien.
+        DEBUG('e', (char*)"Process or thread: V call.\n");
+        int32_t semId;
+        Semaphore* ptSema;
+        semId = g_machine->ReadIntRegister(4); //on lit l'id du Sema
+        ptSema = (Semaphore *)g_object_ids->SearchObject(semId); //on regarde si le Sema existe
+        if (ptSema && ptSema->type == SEMAPHORE_TYPE) //si l'objet récup de r4: on vérifie qu'il ne soit pas NULL ET qu'il soit du bon type
+        {
+            ptSema->V();
+            g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien déroulé, on renvoit 0 dans le registre 2.
+        } else {
+            g_syscall_error->SetMsg((char*)"impossible de resoudre V() dans la routine d'exception",ERROR);
+            g_machine->WriteIntRegister(2,ERROR);
+        }
+        DEBUG('e',(char*)"Fin V");
+  break;
     }
+
      //TODODO: à rendre le vendredi 2 mars 8h (2018)
      //TODODO: les fichiers modifiés (tous) + programme de testing
      //TODODO: avec en plus un rapport d'avancement
     case SC_SEM_CREATE:{ //d'après page 32, string r4, int r5 et puis semId r2 en retour
+        int size;
+        int addr;
+        addr = g_machine->ReadIntRegister(4);
+        size = GetLengthParam(addr);
+        char debugName[size];
+        GetStringParam(addr,debugName,size);
+        int count = g_machine->ReadIntRegister(5);
+        Semaphore *ptSema = Semaphore(debugName, count);
+        int32_t SemId;
+        if (ptSema && ptSema->type == SEMAPHORE_TYPE) {
+            semId = g_object_ids->AddObject(ptSema); //found and adapted from the SC_NEW_THREAD example.
+            g_machine->WriteIntRegister(semId);
+        } else {
+            g_syscall_error->SetMsg((char*)"impossible de resoudre Semaphore() dans la routine d'exception",ERROR);
+            g_machine->WriteIntRegister(2,ERROR);
+        }
+        DEBUG('e',(char*)"Fin SEM_CREATE");
+        break;
+    }
 
-        break;
-    }
     case SC_SEM_DESTROY:{
+        int32_t semId = g_machine->ReadIntRegister(4); //semId = le sema de la page 32
+        Semaphore *ptSema = (Semaphore *)g_object_ids->SearchObject(semId); //on regarde si le Sema existe
+        if (ptSema && ptSema->type == SEMAPHORE_TYPE) //si l'objet récup de r4: on vérifie qu'il ne soit pas NULL ET qu'il soit du bon type
+        {
+            delete ptSema;
+            g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
+        } else {
+            g_syscall_error->SetMsg((char*)semId,INVALID_SEMAPHORE_ID);
+            g_machine->WriteIntRegister(2,INVALID_SEMAPHORE_ID);
+        }
         break;
     }
+
     case SC_LOCK_CREATE:{
+        int size;
+        int addr;
+        addr = g_machine->ReadIntRegister(4);
+        size = GetLengthParam(addr);
+        char debugName[size];
+        GetStringParam(addr,debugName,size);
+        int count = g_machine->ReadIntRegister(5);
+        Lock *ptLock = Lock(debugName);
+        int32_t lockId;
+        if (ptLock && ptLock->type == LOCK_TYPE) {
+            lockId = g_object_ids->AddObject(ptLock); //found and adapted from the SC_NEW_THREAD example.
+            g_machine->WriteIntRegister(lockId);
+
+        } else {
+            g_syscall_error->SetMsg((char*)"impossible de resoudre Lock() dans la routine d'exception",ERROR);
+            g_machine->WriteIntRegister(2,ERROR);
+        }
+        DEBUG('e',(char*)"Fin LOCK_CREATE");
         break;
     }
+
     case SC_LOCK_DESTROY:{
+        int32_t lockId = g_machine->ReadIntRegister(4);
+        Lock *ptLock = (Lock *)g_object_ids->SearchObject(lockId);
+        if (ptLock && ptLock->type == LOCK_TYPE) {
+            delete ptLock;
+            g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
+        } else {
+            g_syscall_error->SetMsg((char*)lockId,INVALID_LOCK_ID);
+            g_machine->WriteIntRegister(2,INVALID_LOCK_ID);
+        }
         break;
     }
+
     case SC_LOCK_ACQUIRE:{
+        int32_t lockId = g_machine->ReadIntRegister(4);
+        Lock *ptLock = (Lock *)g_object_ids->SearchObject(lockId);
+        if (ptLock && ptLock->type == LOCK_TYPE) {
+            ptLock->Acquire();
+            g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
+        } else {
+            g_syscall_error->SetMsg((char*)lockId,INVALID_LOCK_ID);
+            g_machine->WriteIntRegister(2,INVALID_LOCK_ID);
+        }
         break;
     }
+
     case SC_LOCK_RELEASE:{
+        int32_t lockId = g_machine->ReadIntRegister(4);
+        Lock *ptLock = (Lock *)g_object_ids->SearchObject(lockId);
+        if (ptLock && ptLock->type == LOCK_TYPE) {
+            ptLock->Release();
+            g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
+        } else {
+            g_syscall_error->SetMsg((char*)lockId,INVALID_LOCK_ID);
+            g_machine->WriteIntRegister(2,INVALID_LOCK_ID);
+        }
         break;
     }
+
     case SC_COND_CREATE:{
+        int size;
+        int addr;
+        addr = g_machine->ReadIntRegister(4);
+        size = GetLengthParam(addr);
+        char debugName[size];
+        GetStringParam(addr,debugName,size);
+        int count = g_machine->ReadIntRegister(5);
+        Condition *ptCond = Condition(debugName);
+        int32_t condId;
+        if (ptCond && ptCond->type == CONDITION_TYPE) {
+            condId = g_object_ids->AddObject(ptCond); //found and adapted from the SC_NEW_THREAD example.
+            g_machine->WriteIntRegister(condId);
+        } else {
+            g_syscall_error->SetMsg((char*)"impossible de resoudre Condition() dans la routine d'exception",ERROR);
+            g_machine->WriteIntRegister(2,ERROR);
+        }
+        DEBUG('e',(char*)"Fin COND_CREATE");
         break;
     }
+
     case SC_COND_DESTROY:{
         break;
     }
     case SC_COND_WAIT:{
-        break;
+      break;
     }
     case SC_COND_SIGNAL:{
-        break;
+      break;
     }
     case SC_COND_BROADCAST:{
-        break;
+      break;
     }
     #endif
 
