@@ -318,8 +318,8 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
         char debugName[size];
         GetStringParam(addr,debugName,size);
         int count = g_machine->ReadIntRegister(5);
-        Semaphore *ptSema = Semaphore(debugName, count);
-        int32_t SemId;
+        Semaphore *ptSema = new Semaphore(debugName, count);
+        int32_t semId;
         if (ptSema && ptSema->type == SEMAPHORE_TYPE) {
             semId = g_object_ids->AddObject(ptSema); //found and adapted from the SC_NEW_THREAD example.
             g_machine->WriteIntRegister(2,semId);
@@ -360,11 +360,11 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
         size = GetLengthParam(addr);
         char debugName[size];
         GetStringParam(addr,debugName,size);
-        Lock *ptLock = Lock(debugName);
+        Lock *ptLock = new Lock(debugName);
         int32_t lockId;
         if (ptLock && ptLock->type == LOCK_TYPE) {
             lockId = g_object_ids->AddObject(ptLock); //found and adapted from the SC_NEW_THREAD example.
-            g_machine->WriteIntRegister(lockId);
+            g_machine->WriteIntRegister(2, lockId);
 
         } else {
             g_syscall_error->SetMsg((char*)"impossible de resoudre Lock() dans la routine d'exception",ERROR);
@@ -444,11 +444,11 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
         size = GetLengthParam(addr);
         char debugName[size];
         GetStringParam(addr,debugName,size);
-        Condition *ptCond = Condition(debugName);
+        Condition *ptCond = new Condition(debugName);
         int32_t condId;
         if (ptCond && ptCond->type == CONDITION_TYPE) {
             condId = g_object_ids->AddObject(ptCond); //found and adapted from the SC_NEW_THREAD example.
-            g_machine->WriteIntRegister(condId);
+            g_machine->WriteIntRegister(2, condId);
         } else {
             g_syscall_error->SetMsg((char*)"impossible de resoudre Condition() dans la routine d'exception",ERROR);
             g_machine->WriteIntRegister(2,ERROR);
@@ -459,13 +459,13 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
 
     case SC_COND_DESTROY:{
         int32_t condId = g_machine->ReadIntRegister(4); //CondId = int
-        Cond *ptCond = (Cond *)g_object_ids->SearchObject(condId);
+        Condition *ptCond = (Condition *)g_object_ids->SearchObject(condId);
         if (ptCond && ptCond->type == CONDITION_TYPE) {
             delete ptCond;
             g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
         } else {
             //create a char to contain an int (hexa)
-            charCondId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+            char charCondId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
             int i;
             for (i = 0; i < 8; i++){
                 int32_t temp = (condId >> (i*4)) & 0xF;
@@ -479,7 +479,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
     }
     case SC_COND_WAIT:{
       int32_t condId = g_machine->ReadIntRegister(4);
-      Cond *ptCond = (Cond *)g_object_ids->SearchObject(condId);
+        Condition *ptCond = (Condition *)g_object_ids->SearchObject(condId);
       if (ptCond && ptCond->type == CONDITION_TYPE) {
           ptCond->Wait();
           g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
@@ -499,7 +499,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
     }
     case SC_COND_SIGNAL:{
       int32_t condId = g_machine->ReadIntRegister(4);
-      Cond *ptCond = (Cond *)g_object_ids->SearchObject(condId);
+        Condition *ptCond = (Condition *)g_object_ids->SearchObject(condId);
       if (ptCond && ptCond->type == CONDITION_TYPE) {
           ptCond->Signal();
           g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
@@ -519,7 +519,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
     }
     case SC_COND_BROADCAST:{
       int32_t condId = g_machine->ReadIntRegister(4);
-      Cond *ptCond = (Cond *)g_object_ids->SearchObject(condId);
+        Condition *ptCond = (Condition *)g_object_ids->SearchObject(condId);
       if (ptCond && ptCond->type == CONDITION_TYPE) {
           ptCond->Broadcast();
           g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
