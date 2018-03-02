@@ -322,7 +322,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
         int32_t SemId;
         if (ptSema && ptSema->type == SEMAPHORE_TYPE) {
             semId = g_object_ids->AddObject(ptSema); //found and adapted from the SC_NEW_THREAD example.
-            g_machine->WriteIntRegister(semId);
+            g_machine->WriteIntRegister(2,semId);
         } else {
             g_syscall_error->SetMsg((char*)"impossible de resoudre Semaphore() dans la routine d'exception",ERROR);
             g_machine->WriteIntRegister(2,ERROR);
@@ -352,7 +352,6 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
         size = GetLengthParam(addr);
         char debugName[size];
         GetStringParam(addr,debugName,size);
-        int count = g_machine->ReadIntRegister(5);
         Lock *ptLock = Lock(debugName);
         int32_t lockId;
         if (ptLock && ptLock->type == LOCK_TYPE) {
@@ -374,7 +373,15 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             delete ptLock;
             g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
         } else {
-            g_syscall_error->SetMsg((char*)lockId,INVALID_LOCK_ID);
+            //create a char to contain an int (hexa)
+            charLockId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+            int i;
+            for (i = 0; i < 8; i++){
+                int32_t temp = (lockId >> (i*4)) & 0x1111;
+                charLockId[2+(8-i)] = 65 + temp;
+            }
+            //fin de la conv
+            g_syscall_error->SetMsg(charLockId,INVALID_LOCK_ID);
             g_machine->WriteIntRegister(2,INVALID_LOCK_ID);
         }
         break;
@@ -387,7 +394,15 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             ptLock->Acquire();
             g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
         } else {
-            g_syscall_error->SetMsg((char*)lockId,INVALID_LOCK_ID);
+            //create a char to contain an int (hexa)
+            charLockId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+            int i;
+            for (i = 0; i < 8; i++){
+                int32_t temp = (lockId >> (i*4)) & 0x1111;
+                charLockId[2+(8-i)] = 65 + temp;
+            }
+            //fin de la conv
+            g_syscall_error->SetMsg(charLockId,INVALID_LOCK_ID);
             g_machine->WriteIntRegister(2,INVALID_LOCK_ID);
         }
         break;
@@ -400,7 +415,15 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             ptLock->Release();
             g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
         } else {
-            g_syscall_error->SetMsg((char*)lockId,INVALID_LOCK_ID);
+            //create a char to contain an int (hexa)
+            charLockId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+            int i;
+            for (i = 0; i < 8; i++){
+                int32_t temp = (lockId >> (i*4)) & 0x1111;
+                charLockId[2+(8-i)] = 65 + temp;
+            }
+            //fin de la conv
+            g_syscall_error->SetMsg(charLockId,INVALID_LOCK_ID);
             g_machine->WriteIntRegister(2,INVALID_LOCK_ID);
         }
         break;
@@ -413,7 +436,6 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
         size = GetLengthParam(addr);
         char debugName[size];
         GetStringParam(addr,debugName,size);
-        int count = g_machine->ReadIntRegister(5);
         Condition *ptCond = Condition(debugName);
         int32_t condId;
         if (ptCond && ptCond->type == CONDITION_TYPE) {
