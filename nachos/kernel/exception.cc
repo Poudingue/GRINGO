@@ -339,7 +339,15 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             delete ptSema;
             g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
         } else {
-            g_syscall_error->SetMsg((char*)semId,INVALID_SEMAPHORE_ID);
+            //create a char to contain an int (hexa)
+            char charSemId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+            int i;
+            for (i = 0; i < 8; i++){
+                int32_t temp = (semId >> (i*4)) & 0xF;
+                charSemId[2+(8-i)] = 65 + temp;
+            }
+            //fin de la conv
+            g_syscall_error->SetMsg(charSemId,INVALID_SEMAPHORE_ID);
             g_machine->WriteIntRegister(2,INVALID_SEMAPHORE_ID);
         }
         break;
@@ -374,10 +382,10 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
         } else {
             //create a char to contain an int (hexa)
-            charLockId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+            char charLockId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
             int i;
             for (i = 0; i < 8; i++){
-                int32_t temp = (lockId >> (i*4)) & 0x1111;
+                int32_t temp = (lockId >> (i*4)) & 0xF;
                 charLockId[2+(8-i)] = 65 + temp;
             }
             //fin de la conv
@@ -395,10 +403,10 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
         } else {
             //create a char to contain an int (hexa)
-            charLockId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+            char charLockId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
             int i;
             for (i = 0; i < 8; i++){
-                int32_t temp = (lockId >> (i*4)) & 0x1111;
+                int32_t temp = (lockId >> (i*4)) & 0xF;
                 charLockId[2+(8-i)] = 65 + temp;
             }
             //fin de la conv
@@ -416,10 +424,10 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
         } else {
             //create a char to contain an int (hexa)
-            charLockId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+            char charLockId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
             int i;
             for (i = 0; i < 8; i++){
-                int32_t temp = (lockId >> (i*4)) & 0x1111;
+                int32_t temp = (lockId >> (i*4)) & 0xF;
                 charLockId[2+(8-i)] = 65 + temp;
             }
             //fin de la conv
@@ -450,15 +458,83 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
     }
 
     case SC_COND_DESTROY:{
+        int32_t condId = g_machine->ReadIntRegister(4); //CondId = int
+        Cond *ptCond = (Cond *)g_object_ids->SearchObject(condId);
+        if (ptCond && ptCond->type == CONDITION_TYPE) {
+            delete ptCond;
+            g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
+        } else {
+            //create a char to contain an int (hexa)
+            charCondId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+            int i;
+            for (i = 0; i < 8; i++){
+                int32_t temp = (condId >> (i*4)) & 0xF;
+                charCondId[2+(8-i)] = 65 + temp;
+            }
+            //fin de la conv
+            g_syscall_error->SetMsg(charCondId,INVALID_CONDITION_ID);
+            g_machine->WriteIntRegister(2,INVALID_CONDITION_ID);
+        }
         break;
     }
     case SC_COND_WAIT:{
+      int32_t condId = g_machine->ReadIntRegister(4);
+      Cond *ptCond = (Cond *)g_object_ids->SearchObject(condId);
+      if (ptCond && ptCond->type == CONDITION_TYPE) {
+          ptCond->Wait();
+          g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
+      } else {
+          //create a char to contain an int (hexa)
+          char charCondId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+          int i;
+          for (i = 0; i < 8; i++){
+              int32_t temp = (condId >> (i*4)) & 0xF;
+              charCondId[2+(8-i)] = 65 + temp;
+          }
+          //fin de la conv
+          g_syscall_error->SetMsg(charCondId,INVALID_CONDITION_ID);
+          g_machine->WriteIntRegister(2,INVALID_CONDITION_ID);
+      }
       break;
     }
     case SC_COND_SIGNAL:{
+      int32_t condId = g_machine->ReadIntRegister(4);
+      Cond *ptCond = (Cond *)g_object_ids->SearchObject(condId);
+      if (ptCond && ptCond->type == CONDITION_TYPE) {
+          ptCond->Signal();
+          g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
+      } else {
+          //create a char to contain an int (hexa)
+          char charCondId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+          int i;
+          for (i = 0; i < 8; i++){
+              int32_t temp = (condId >> (i*4)) & 0xF;
+              charCondId[2+(8-i)] = 65 + temp;
+          }
+          //fin de la conv
+          g_syscall_error->SetMsg(charCondId,INVALID_CONDITION_ID);
+          g_machine->WriteIntRegister(2,INVALID_CONDITION_ID);
+      }
       break;
     }
     case SC_COND_BROADCAST:{
+      int32_t condId = g_machine->ReadIntRegister(4);
+      Cond *ptCond = (Cond *)g_object_ids->SearchObject(condId);
+      if (ptCond && ptCond->type == CONDITION_TYPE) {
+          ptCond->Broadcast();
+          g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien passé
+      } else {
+          //create a char to contain an int (hexa)
+          char charCondId[11] = {'0', 'x', '0', '0', '0', '0', '0', '0', '0', '0', '\n'};
+          int i;
+          for (i = 0; i < 8; i++){
+              int32_t temp = (condId >> (i*4)) & 0xF;
+              charCondId[2+(8-i)] = 65 + temp;
+          }
+          //fin de la conv
+          g_syscall_error->SetMsg(charCondId,INVALID_CONDITION_ID);
+          g_machine->WriteIntRegister(2,INVALID_CONDITION_ID);
+      }
       break;
     }
     #endif
