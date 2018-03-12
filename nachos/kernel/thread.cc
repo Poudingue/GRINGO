@@ -111,6 +111,9 @@ int Thread::Start(Process *owner,
 #ifdef ETUDIANTS_TP
 int Thread::Start(Process *owner, int32_t func, int arg)
 {
+    //on associe notre thread au processus "parent" indiqué en paramètre.
+    this->process = owner;
+
     //on alloue une nouvelle pile utilisateur, dont la taille est spécifié dans le fichier de configuration nachos.cfg.
     int sp = process->addrspace->StackAllocate(); //return the stack pointer = the end of the allocated stack (ie. addrspace.h).
 
@@ -123,11 +126,6 @@ int Thread::Start(Process *owner, int32_t func, int arg)
 
     //on initialise le contenu du contexte du simulateur MIPS.
     this->InitSimulatorContext(/*int8_t* base_stack_addr*/ mem, /*unsigned long int stack_size*/ SIMULATORSTACKSIZE);
-
-    //on associe notre thread au processus "parent" indiqué en paramètre.
-    owner = this->process;
-
-
 
     //On indiquera également au processus spécifié que le nombre de threads a été augmenté d’un thread.
     process->numThreads++;
