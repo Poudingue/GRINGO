@@ -109,6 +109,39 @@ int Thread::Start(Process *owner,
 }
 #endif
 #ifdef ETUDIANTS_TP
+int Thread::Start(Process *owner, int32_t func, int arg)
+{
+    //on alloue une nouvelle pile utilisateur, dont la taille est spécifié dans le fichier de configuration nachos.cfg.
+    int sp = process->addrspace->StackAllocate(); //return the stack pointer = the end of the allocated stack (ie. addrspace.h).
+
+    //on alloue une nouvelle pile pour le simulateur MIPS = la pile noyau
+    int8_t *mem = AllocBoundedArray(SIMULATORSTACKSIZE);
+
+    //on initialise le contenu du contexte utilisateur, en faisant pointé PC sur func car on veut pouvoir
+    //executer cette fonction dans "en parallèle" (= un autre thread ici)
+    this->InitThreadContext(/*int32_t initialPCREG*/ func,/*int32_t initialSP*/ sp, /*int32_t*/ arg);
+
+    //on initialise le contenu du contexte du simulateur MIPS.
+    this->InitSimulatorContext(/*int8_t* base_stack_addr*/ mem, /*unsigned long int stack_size*/ SIMULATORSTACKSIZE);
+
+    //on associe notre thread au processus "parent" indiqué en paramètre.
+    owner = this->process;
+
+
+
+    //On indiquera également au processus spécifié que le nombre de threads a été augmenté d’un thread.
+    process->numThreads++;
+
+    //Enfin, le nouveau thread sera inséré dans la file des threads vivants (g_alive) et aussi dans celle des threads prêts.
+    g_alive->Append((void *) g_current_thread);//les threads vivants
+
+    //et de marquer le thread comme étant prêt à être exécuté.
+    IntStatus old = g_machine->interrupt->SetStatus(INTERRUPTS_OFF); //on doit masquer les interruptions lors de l'appel à ReadyToRun().
+    g_scheduler->ReadyToRun(this);
+    g_machine->interrupt->SetStatus(old);
+
+    return NO_ERROR;
+}
 #endif
 //----------------------------------------------------------------------
 // Thread::InitThreadContext
@@ -269,6 +302,20 @@ Thread::Finish ()
  }
  #endif
  #ifdef ETUDIANTS_TP
+ void
+ Thread::Finish ()
+ {
+    g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+    DEBUG('t', (char *)"Finishing thread \"%s\"\n", GetName());
+
+    //si nachos était multiprocesseur, g_thread_to_be_destroyed devrait être une liste à accès critique
+   g_thread_to_be_destroyed = this; //c'est un pointeur de thread, CF kernel/system.cc
+
+   // Go to sleep
+   Sleep();  // invokes SWITCH
+   //on ne pourra pas atteindre de code après l'appel à Sleep car celui-ci nous emmène nous faire détruire par SwitchTo,
+   //donc pas besoin de remetre les interruptions
+  }
  #endif
 //----------------------------------------------------------------------
 // Thread::Yield
@@ -367,14 +414,15 @@ Thread::SaveProcessorState()
 void
 Thread::SaveProcessorState() //TODODO:to be verified
 {   //as seen in machine/machine.h there is a const which indicate the max number of register of the machine: NUM_INT_REGS
-    for (int i=0; i < NUM_INT_REGS; i++){ //we need to save all those registers in thread_context (seen in thread.h) ..
-        thread_context->int_registers[i] = g_machine->ReadIntRegister(i); //.. because we only have a set of register for all our threads
+    int i;
+    for (i=0; i < NUM_INT_REGS; i++){ //we need to save all those registers in thread_context (seen in thread.h) ..
+        thread_context.int_registers[i] = g_machine->ReadIntRegister(i); //.. because we only have a set of register for all our threads
     }
     //we also need to save the floating points int_registers
-    for (int i=0; i < NUM_FP_REGS; i++){ //we need to save all those registers in thread_context (seen in thread.h) ..
-        thread_context->float_registers[i] = g_machine->ReadFPRegister(i); //.. because we only have a set of register for all our threads
+    for (i=0; i < NUM_FP_REGS; i++){ //we need to save all those registers in thread_context (seen in thread.h) ..
+        thread_context.float_registers[i] = g_machine->ReadFPRegister(i); //.. because we only have a set of register for all our threads
     }
-    thread_context->cc = g_machine->ReadCC(); //we also need to save the condition code
+    thread_context.cc = g_machine->ReadCC(); //we also need to save the condition code
 }
 #endif
 //----------------------------------------------------------------------
@@ -394,14 +442,15 @@ Thread::RestoreProcessorState()
 void
 Thread::RestoreProcessorState() //inverse of SaveProcessorState: we restore each registers. //TODODO: to be verified
 {
-  for (int i=0; i < NUM_INT_REGS; i++){
-      g_machine->WriteIntRegister(i, thread_context->int_registers[i]);
+  int i; //is our mips compiler a c89 compiler ?
+  for (i=0; i < NUM_INT_REGS; i++){
+      g_machine->WriteIntRegister(i, thread_context.int_registers[i]);
   }
 
-  for (int i=0; i < NUM_FP_REGS; i++){
-      g_machine->WriteFPRegister(i, thread_context->float_registers[i]);
+  for (i=0; i < NUM_FP_REGS; i++){
+      g_machine->WriteFPRegister(i, thread_context.float_registers[i]);
   }
-  g_machine->WriteCC(thread_context->cc);
+  g_machine->WriteCC(thread_context.cc);
 }
 #endif
 //----------------------------------------------------------------------
