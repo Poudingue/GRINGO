@@ -170,25 +170,6 @@ void Lock::Acquire() {
 #endif
 #ifdef ETUDIANTS_TP
 void Lock::Acquire(){
-  /**//**//**//**///TODODO: TO BE REMOVED
-  printf("the thread \"%s\"call Aquire().\n", g_current_thread->GetName());
-  if (! sleepqueue->IsEmpty()){
-    printf("state of the sleepqueue:\n");
-    Listint *backup = new Listint;
-    while (! sleepqueue->IsEmpty()){
-      Thread * temp = (Thread *) sleepqueue->Remove();
-      printf("\t%s\n",temp->GetName());
-      backup->Append(temp);
-    }
-    while (! backup->IsEmpty()){
-      Thread * temp = (Thread *) backup->Remove();
-      sleepqueue->Append(temp);
-    }
-    delete backup;
-  }
-  puts("");
-  fflush(stdout);
-  /**//**//**///TODODO: END OF TO BE REMOVED
 
   IntStatus oldstatus = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
   free = false;
@@ -223,27 +204,6 @@ void Lock::Release() {
 #endif
 #ifdef ETUDIANTS_TP
 void Lock::Release(){
-
-
-    /**//**//**//**///TODODO: TO BE REMOVED
-    printf("the thread \"%s\"call Release().\n", g_current_thread->GetName());
-    if (! sleepqueue->IsEmpty()){
-      printf("state of the sleepqueue:\n");
-      Listint *backup = new Listint;
-      while (! sleepqueue->IsEmpty()){
-        Thread * temp = (Thread *) sleepqueue->Remove();
-        printf("\t%s\n",temp->GetName());
-        backup->Append(temp);
-      }
-      while (! backup->IsEmpty()){
-        Thread * temp = (Thread *) backup->Remove();
-        sleepqueue->Append(temp);
-      }
-      delete backup;
-    }
-    puts("");
-    fflush(stdout);
-    /**//**//**///TODODO: END OF TO BE REMOVED
 
   IntStatus lastStatus = g_machine->interrupt->SetStatus (INTERRUPTS_OFF);
   Thread * temp = (Thread *) sleepqueue->Remove();
