@@ -127,16 +127,19 @@ int Thread::Start(Process *owner, int32_t func, int arg)
     //on initialise le contenu du contexte du simulateur MIPS.
     this->InitSimulatorContext(/*int8_t* base_stack_addr*/ mem, /*unsigned long int stack_size*/ SIMULATORSTACKSIZE);
 
+    IntStatus old = g_machine->interrupt->SetStatus(INTERRUPTS_OFF); //on doit masquer les interruptions lors de l'appel à ReadyToRun().
+
     //On indiquera également au processus spécifié que le nombre de threads a été augmenté d’un thread.
     process->numThreads++;
+
+    g_machine->interrupt->SetStatus(old);
 
     //Enfin, le nouveau thread sera inséré dans la file des threads vivants (g_alive) et aussi dans celle des threads prêts.
     g_alive->Append((void *) g_current_thread);//les threads vivants
 
     //et de marquer le thread comme étant prêt à être exécuté.
-    IntStatus old = g_machine->interrupt->SetStatus(INTERRUPTS_OFF); //on doit masquer les interruptions lors de l'appel à ReadyToRun().
+
     g_scheduler->ReadyToRun(this);
-    g_machine->interrupt->SetStatus(old);
 
     return NO_ERROR;
 }
@@ -303,16 +306,21 @@ Thread::Finish ()
  void
  Thread::Finish ()
  {
-    g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+    IntStatus old = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
     DEBUG('t', (char *)"Finishing thread \"%s\"\n", GetName());
 
     //si nachos était multiprocesseur, g_thread_to_be_destroyed devrait être une liste à accès critique
    g_thread_to_be_destroyed = this; //c'est un pointeur de thread, CF kernel/system.cc
 
+   g_alive->RemoveItem(this);
+
    // Go to sleep
    Sleep();  // invokes SWITCH
    //on ne pourra pas atteindre de code après l'appel à Sleep car celui-ci nous emmène nous faire détruire par SwitchTo,
    //donc pas besoin de remetre les interruptions
+
+   //mais pour la bonne forme
+   g_machine->interrupt->SetStatus(old);
   }
  #endif
 //----------------------------------------------------------------------

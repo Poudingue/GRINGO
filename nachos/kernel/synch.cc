@@ -85,10 +85,11 @@ Semaphore::P() {
 void
 Semaphore::P() {
   IntStatus lastStatus = g_machine->interrupt->SetStatus (INTERRUPTS_OFF); //disable interrupt
-  this->value--;
-  if (this->value < 0){
+  if (this->value <= 0){
     queue->Append((void *) g_current_thread);
     g_current_thread->Sleep();
+  } else {
+    this->value--;
   }
   g_machine->interrupt->SetStatus(lastStatus);
   //exit(-1);
@@ -114,9 +115,13 @@ Semaphore::V() {
 void
 Semaphore::V() {
    IntStatus lastStatus = g_machine->interrupt->SetStatus (INTERRUPTS_OFF);
-   this->value++;
-   g_scheduler->ReadyToRun((Thread *) queue->Remove()); //TODODO: is it correct ?
-   g_machine->interrupt->SetStatus(lastStatus);
+   //this->value++;
+   if ((this->queue->IsEmpty()) == false){
+     g_scheduler->ReadyToRun((Thread *) queue->Remove()); //TODODO: is it correct ?
+     g_machine->interrupt->SetStatus(lastStatus);
+   } else {
+     this->value++;
+   }
    //exit(-1);
 }
 #endif
@@ -172,16 +177,14 @@ void Lock::Acquire() {
 void Lock::Acquire(){
 
   IntStatus oldstatus = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
-  free = false;
-
-  g_current_thread->Sleep();
-
-  if (free != true){
+  if (free == false){
     sleepqueue->Append(g_current_thread);
-      //g_current_thread->Sleep();
+    g_current_thread->Sleep();
+  } else {
+    free = false;
+    //TODODO faire l'attente de lock free
+    owner = g_current_thread;
   }
-   //TODODO faire l'attente de lock free
-  owner = g_current_thread;
 
   g_machine->interrupt->SetStatus(oldstatus);
 }
@@ -206,13 +209,14 @@ void Lock::Release() {
 void Lock::Release(){
 
   IntStatus lastStatus = g_machine->interrupt->SetStatus (INTERRUPTS_OFF);
-  Thread * temp = (Thread *) sleepqueue->Remove();
-  if (isHeldByCurrentThread()){
+  if (isHeldByCurrentThread() & this->sleepqueue->IsEmpty()){
     free = true;
-    g_scheduler->ReadyToRun(temp);
+
   } else {
-    DEBUG('s', (char *)"isHeldByCurrentThread failed in synch.cc");
-    exit(-1);
+    /*DEBUG('s', (char *)"isHeldByCurrentThread failed in synch.cc");
+    exit(-1);*/
+    Thread * temp = (Thread *) sleepqueue->Remove();
+    g_scheduler->ReadyToRun(temp);
   }
   g_machine->interrupt->SetStatus(lastStatus);
   //exit(-1);
@@ -268,11 +272,10 @@ void Condition::Wait() {
 #endif
 #ifdef ETUDIANTS_TP
 void Condition::Wait() {
-  IntStatus lastatus = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+  IntStatus laststatus = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
   waitqueue->Append((void *) this);
-
-  //TODODO : test. sans doute des choses à ajouter
-  g_machine->interrupt->SetStatus(lastatus);
+  g_current_thread->Sleep();
+  g_machine->interrupt->SetStatus(laststatus);
   //exit(-1);
 
 }
@@ -294,14 +297,17 @@ void Condition::Signal() {
 #endif
 #ifdef ETUDIANTS_TP
 void Condition::Signal() {
-  g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+  IntStatus old = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
   //TODODO: check if it works
-  Thread *temp = (Thread *) waitqueue->Remove();
-  if (temp == NULL){
-    DEBUG('s', (char *) "");
+  if (this->waitqueue->IsEmpty() == false){
+    Thread *temp = (Thread *) waitqueue->Remove();
+    if (temp == NULL){
+      DEBUG('s', (char *) "ERROR: cond sig temp: is NULL");
+      exit(-1);
+    }
+    g_scheduler->ReadyToRun(temp);
   }
-  g_scheduler->ReadyToRun(temp);
-  g_machine->interrupt->SetStatus(INTERRUPTS_ON);
+  g_machine->interrupt->SetStatus(old);
   //exit(-1);
 }
 #endif
@@ -325,7 +331,8 @@ void Condition::Broadcast() {
   while (!waitqueue->IsEmpty()){
     Thread *temp = (Thread *) waitqueue->Remove();
     if (temp == NULL){
-      DEBUG('s', (char *) "");
+      DEBUG('s', (char *) "ERROR: cond br: temp is NULL");
+      exit(-1);
     }
     g_scheduler->ReadyToRun(temp);
   }

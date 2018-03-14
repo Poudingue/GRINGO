@@ -281,7 +281,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             ptSema->P();
             g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien déroulé, on renvoit 0 dans le registre 2.
         } else {
-            g_syscall_error->SetMsg((char*)"impossible de resoudre P() dans la routine d'exception",ERROR); //définit à -1 dans kernel/msgerror.h
+            g_syscall_error->SetMsg((char*)"impossible de resoudre P() dans la routine d'exception",INVALID_SEMAPHORE_ID); //définit dans kernel/msgerror.h
             g_machine->WriteIntRegister(2,ERROR);
         }
         DEBUG('e',(char*)"Fin P");
@@ -300,7 +300,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             ptSema->V();
             g_machine->WriteIntRegister(2,NO_ERROR); //tout s'est bien déroulé, on renvoit 0 dans le registre 2.
         } else {
-            g_syscall_error->SetMsg((char*)"impossible de resoudre V() dans la routine d'exception",ERROR);
+            g_syscall_error->SetMsg((char*)"impossible de resoudre V() dans la routine d'exception",INVALID_SEMAPHORE_ID);
             g_machine->WriteIntRegister(2,ERROR);
         }
         DEBUG('e',(char*)"Fin V");
@@ -348,7 +348,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             }
             //fin de la conv
             g_syscall_error->SetMsg(charSemId,INVALID_SEMAPHORE_ID);
-            g_machine->WriteIntRegister(2,INVALID_SEMAPHORE_ID);
+            g_machine->WriteIntRegister(2,ERROR);
         }
         break;
     }
@@ -367,7 +367,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             g_machine->WriteIntRegister(2, lockId);
 
         } else {
-            g_syscall_error->SetMsg((char*)"impossible de resoudre Lock() dans la routine d'exception",ERROR);
+            g_syscall_error->SetMsg((char*)"impossible de resoudre Lock() dans la routine d'exception",INVALID_LOCK_ID);
             g_machine->WriteIntRegister(2,ERROR);
         }
         DEBUG('e',(char*)"Fin LOCK_CREATE");
@@ -390,7 +390,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             }
             //fin de la conv
             g_syscall_error->SetMsg(charLockId,INVALID_LOCK_ID);
-            g_machine->WriteIntRegister(2,INVALID_LOCK_ID);
+            g_machine->WriteIntRegister(2,ERROR);
         }
         break;
     }
@@ -411,7 +411,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             }
             //fin de la conv
             g_syscall_error->SetMsg(charLockId,INVALID_LOCK_ID);
-            g_machine->WriteIntRegister(2,INVALID_LOCK_ID);
+            g_machine->WriteIntRegister(2,ERROR);
         }
         break;
     }
@@ -432,7 +432,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             }
             //fin de la conv
             g_syscall_error->SetMsg(charLockId,INVALID_LOCK_ID);
-            g_machine->WriteIntRegister(2,INVALID_LOCK_ID);
+            g_machine->WriteIntRegister(2,ERROR);
         }
         break;
     }
@@ -473,7 +473,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
             }
             //fin de la conv
             g_syscall_error->SetMsg(charCondId,INVALID_CONDITION_ID);
-            g_machine->WriteIntRegister(2,INVALID_CONDITION_ID);
+            g_machine->WriteIntRegister(2,ERROR);
         }
         break;
     }
@@ -493,7 +493,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
           }
           //fin de la conv
           g_syscall_error->SetMsg(charCondId,INVALID_CONDITION_ID);
-          g_machine->WriteIntRegister(2,INVALID_CONDITION_ID);
+          g_machine->WriteIntRegister(2,ERROR);
       }
       break;
     }
@@ -513,7 +513,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
           }
           //fin de la conv
           g_syscall_error->SetMsg(charCondId,INVALID_CONDITION_ID);
-          g_machine->WriteIntRegister(2,INVALID_CONDITION_ID);
+          g_machine->WriteIntRegister(2,ERROR);
       }
       break;
     }
@@ -533,7 +533,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
           }
           //fin de la conv
           g_syscall_error->SetMsg(charCondId,INVALID_CONDITION_ID);
-          g_machine->WriteIntRegister(2,INVALID_CONDITION_ID);
+          g_machine->WriteIntRegister(2,ERROR);
       }
       break;
     }
