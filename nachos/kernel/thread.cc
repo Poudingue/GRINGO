@@ -132,7 +132,6 @@ int Thread::Start(Process *owner, int32_t func, int arg)
     //On indiquera également au processus spécifié que le nombre de threads a été augmenté d’un thread.
     process->numThreads++;
 
-    g_machine->interrupt->SetStatus(old);
 
     //Enfin, le nouveau thread sera inséré dans la file des threads vivants (g_alive) et aussi dans celle des threads prêts.
     g_alive->Append((void *) g_current_thread);//les threads vivants
@@ -140,6 +139,9 @@ int Thread::Start(Process *owner, int32_t func, int arg)
     //et de marquer le thread comme étant prêt à être exécuté.
 
     g_scheduler->ReadyToRun(this);
+
+    //on remet les interruptions
+    g_machine->interrupt->SetStatus(old);
 
     return NO_ERROR;
 }
