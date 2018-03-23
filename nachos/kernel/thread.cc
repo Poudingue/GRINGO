@@ -35,12 +35,12 @@
 //----------------------------------------------------------------------
 Thread::Thread(char *threadName)
 {
-  name = new char[strlen(threadName)+1];
-  strcpy(name,threadName);
-  type = THREAD_TYPE;
+    name = new char[strlen(threadName)+1];
+    strcpy(name,threadName);
+    type = THREAD_TYPE;
 
-  // No process owner yet
-  process = NULL;
+    // No process owner yet
+    process = NULL;
 }
 
 //----------------------------------------------------------------------
@@ -82,7 +82,7 @@ Thread::~Thread()
 
     // If I'm the last thread of the process, delete it
     if (process->numThreads==0) {
-      delete process;
+        delete process;
     }
 
     g_machine->interrupt->SetStatus(oldLevel);
@@ -100,12 +100,11 @@ Thread::~Thread()
 */
 //----------------------------------------------------------------------
 #ifndef ETUDIANTS_TP
-int Thread::Start(Process *owner,
-		  int32_t func, int arg)
+int Thread::Start(Process *owner, int32_t func, int arg)
 {
-  ASSERT(process == NULL);
-  printf("**** Warning: method Thread::Start is not implemented yet\n");
-  exit(-1);
+    ASSERT(process == NULL);
+    printf("**** Warning: method Thread::Start is not implemented yet\n");
+    exit(-1);
 }
 #endif
 #ifdef ETUDIANTS_TP
@@ -314,7 +313,7 @@ Thread::Finish ()
     //si nachos était multiprocesseur, g_thread_to_be_destroyed devrait être une liste à accès critique
    g_thread_to_be_destroyed = this; //c'est un pointeur de thread, CF kernel/system.cc
 
-   /**//**///g_alive->RemoveItem(this);
+   g_alive->RemoveItem(this);
 
    // Go to sleep
    Sleep();  // invokes SWITCH
@@ -421,7 +420,8 @@ Thread::SaveProcessorState()
 #ifdef ETUDIANTS_TP
 void
 Thread::SaveProcessorState() //TODODO:to be verified
-{   //as seen in machine/machine.h there is a const which indicate the max number of register of the machine: NUM_INT_REGS
+{
+    //as seen in machine/machine.h there is a const which indicate the max number of register of the machine: NUM_INT_REGS
     int i;
     for (i=0; i < NUM_INT_REGS; i++){ //we need to save all those registers in thread_context (seen in thread.h) ..
         thread_context.int_registers[i] = g_machine->ReadIntRegister(i); //.. because we only have a set of register for all our threads
@@ -450,15 +450,15 @@ Thread::RestoreProcessorState()
 void
 Thread::RestoreProcessorState() //inverse of SaveProcessorState: we restore each registers. //TODODO: to be verified
 {
-  int i; //is our mips compiler a c89 compiler ?
-  for (i=0; i < NUM_INT_REGS; i++){
-      g_machine->WriteIntRegister(i, thread_context.int_registers[i]);
-  }
+    int i; //is our mips compiler a c89 compiler ?
+    for (i=0; i < NUM_INT_REGS; i++){
+        g_machine->WriteIntRegister(i, thread_context.int_registers[i]);
+    }
 
-  for (i=0; i < NUM_FP_REGS; i++){
-      g_machine->WriteFPRegister(i, thread_context.float_registers[i]);
-  }
-  g_machine->WriteCC(thread_context.cc);
+    for (i=0; i < NUM_FP_REGS; i++){
+        g_machine->WriteFPRegister(i, thread_context.float_registers[i]);
+    }
+    g_machine->WriteCC(thread_context.cc);
 }
 #endif
 //----------------------------------------------------------------------
@@ -469,7 +469,7 @@ Thread::RestoreProcessorState() //inverse of SaveProcessorState: we restore each
 void
 Thread::SaveSimulatorState()
 {
-  getcontext(&(simulator_context.buf));
+    getcontext(&(simulator_context.buf));
 }
 
 //----------------------------------------------------------------------
@@ -480,5 +480,5 @@ Thread::SaveSimulatorState()
 void
 Thread::RestoreSimulatorState()
 {
-  setcontext(&(simulator_context.buf));
+    setcontext(&(simulator_context.buf));
 }

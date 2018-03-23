@@ -100,7 +100,7 @@ int DriverACIA::TtySend(char* buff)
 
         //tout s'est bien passé ! On remet ind_send à la bonne valeur (il a été incrémenté une fois de trop)
         return --ind_send;
-    }else {
+    }else{
         printf("mode interruption non implémenté");
         exit(-1);
     }
@@ -128,7 +128,7 @@ int DriverACIA::TtyReceive(char* buff,int lg)
     if (lg > BUFFER_SIZE){
         printf("**** Warning: trying to receive buffer size of size %d > %d (BUFFER_SIZE)", lg, BUFFER_SIZE);
         lg = BUFFER_SIZE;
-    } else if (lg < 0){
+    }else if (lg < 0){
         printf("**** Warning: trying to receive buffer size of size %d < 0", lg);
         lg = 0;
     }
@@ -166,7 +166,7 @@ int DriverACIA::TtyReceive(char* buff,int lg)
 
         //tout s'est bien passé!
         return ind_rec;
-    } else {
+    }else{
         printf("on ne supporte pas les interruptions pour le moment");
         exit(-1);
     }
