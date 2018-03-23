@@ -37,26 +37,26 @@
 #ifndef ETUDIANTS_TP
 DriverACIA::DriverACIA()
 {
-  printf("**** Warning: contructor of the ACIA driver not implemented yet\n");
-  exit(-1);
+    printf("**** Warning: contructor of the ACIA driver not implemented yet\n");
+    exit(-1);
 }
 #endif
 #ifdef ETUDIANTS_TP
 DriverACIA::DriverACIA()
 {
-  printf("**** Warning: ACIA driver will only work in busy waiting mode for now\n")
-  //on initialise les index des tampons à 0.
-  ind_send = 0;
-  ind_rec = 0;
+    printf("**** Warning: ACIA driver will only work in busy waiting mode for now\n");
+    //on initialise les index des tampons à 0.
+    ind_send = 0;
+    ind_rec  = 0;
 
-  //On crée une sémaphore pour la synchronisation des différentes instances
-  //d'après drvACIA.h
-  send_sema = new Semaphore("envois", 1);
-  receive_sema = new Semaphore("reception", 1);
+    //On crée une sémaphore pour la synchronisation des différentes instances
+    //d'après drvACIA.h
+    send_sema    = new Semaphore("envoi",     1);
+    receive_sema = new Semaphore("reception", 1);
 
-  //on demande à l'ACIA de se mettre en mode "attente active"
-  //d'après machine/ACIA.cc
-  g_machine->acia->SetWorkingMode(BUSY_WAITING);
+    //on demande à l'ACIA de se mettre en mode "attente active"
+    //d'après machine/ACIA.cc
+    g_machine->acia->SetWorkingMode(BUSY_WAITING);
 }
 #endif
 
@@ -68,45 +68,42 @@ DriverACIA::DriverACIA()
 #ifndef ETUDIANTS_TP
 int DriverACIA::TtySend(char* buff)
 {
-  printf("**** Warning: method Tty_Send of the ACIA driver not implemented yet\n");
-  exit(-1);
-  return 0;
+    printf("**** Warning: method Tty_Send of the ACIA driver not implemented yet\n");
+    exit(-1);
+    return 0;
 }
 #endif
 #ifdef ETUDIANTS_TP
 int DriverACIA::TtySend(char* buff)
 {
-  //on empêche que plusieurs instances ne puissent envoyer en même temps!
-  send_sema->P();
+    if (g_machine->acia->GetWorkingMode() == BUSY_WAITING){
+        //on empêche que plusieurs instances puissent envoyer en même temps!
+        send_sema->P();
 
-  int suivant = 1; //bool suivant à true pour le while de l'envois
+        //sécurité pour ne pas dépasser la taille du buffer
+        buff[BUFFER_SIZE-1] = '\0';
 
-  //sécurité
-  buff[BUFFER_SIZE-1] == NULL;
+        do{
+            //si on a pas fini de tout envoyer, on patiente
+            while(g_machine->acia->GetOutputStateReg() == FULL){ //FULL défini à 1 dans machine/ACIA.h
+                printf("\rOn patiente activement le temps de l'envoi"); //réecrit sur la même ligne
+            }
 
-  while(suivant){ //on arrêtera l'envois après avoir envoyé NULL (c.a.d '\0').
+            puts(""); // '\n' formatage du texte de debug en console
+            g_machine->acia->PutChar(buff[ind_send]);
 
-    //si on a pas finit de tout envoyer, on patiente
-    while(g_machine->acia->GetOutputStateReg() == FULL){ //FULL définit à 1 dans machine/ACIA.h
-        printf("\ron patiente activement le temps de l'envoi"); //réecrit sur la même ligne
+        } while (buff[ind_send++] != '\0');
+        //on arrête l'envoi après avoir envoyé NULL (c.a.d '\0').
+
+        //on relache notre envoi
+        send_sema->V();
+
+        //tout s'est bien passé ! On remet ind_send à la bonne valeur (il a été incrémenté une fois de trop)
+        return --ind_send;
+    }else {
+        printf("mode interruption non implémenté");
+        exit(-1);
     }
-    puts(""); // '\n' formatage du texte de debug en console
-    g_machine->acia->PutChar(buff[ind_send]);
-
-    if(buff[ind_send] == NULL){ //si on a envoyé NULL, alors on s'arrête
-      suivant = 0;
-    }
-
-    //on incrémente
-    ind_send++;
-
-  }
-
-  //on relache notre envois
-  send_sema->V();
-
-  //tout s'est bien passé!
-  return 0;
 }
 #endif
 
@@ -119,44 +116,60 @@ int DriverACIA::TtySend(char* buff)
 #ifndef ETUDIANTS_TP
 int DriverACIA::TtyReceive(char* buff,int lg)
 {
-   printf("**** Warning: method Tty_Receive of the ACIA driver not implemented yet\n");
-  exit(-1);
-  return 0;
+    printf("**** Warning: method Tty_Receive of the ACIA driver not implemented yet\n");
+    exit(-1);
+    return 0;
 }
 #endif
 #ifdef ETUDIANTS_TP
 int DriverACIA::TtyReceive(char* buff,int lg)
 {
-  //on empêche que plusieurs instances ne puissent envoyer en même temps!
-  receive_sema->P();
-
-  int suivant = 1; //bool suivant à true pour le while de l'envois
-
-
-  while(suivant && ind_rec != BUFFER_SIZE - 2){
-
-    //si on a pas finit de tout envoyer, on patiente
-    while(g_machine->acia->GetInputStateReg() == EMPTY){ //EMPTY définit à 0 dans machine/ACIA.h
-        printf("\ron patiente activement le temps de la reception"); //réecrit sur la même ligne
-    }
-    puts(""); // '\n' formatage du texte de debug en console
-    g_machine->acia->GetChar(buff[ind_send]);
-
-    if( buff[ind_rec] == NULL){ //si on a envoyé NULL, alors on s'arrête
-      suivant = 0;
+    //protection de lg
+    if (lg > BUFFER_SIZE){
+        printf("**** Warning: trying to receive buffer size of size %d > %d (BUFFER_SIZE)", lg, BUFFER_SIZE);
+        lg = BUFFER_SIZE;
+    } else if (lg < 0){
+        printf("**** Warning: trying to receive buffer size of size %d < 0", lg);
+        lg = 0;
     }
 
-    //on incrémente
-    ind_rec++;
+    if (g_machine->acia->GetWorkingMode() == BUSY_WAITING) {
+        //on empêche que plusieurs instances ne puissent recevoir en même temps!
+        receive_sema->P();
 
-  }
-  buff[BUFFER_SIZE - 1] = NULL; //sécurité
+        while(ind_rec < BUFFER_SIZE){
+            //si on a pas finit de tout recevoir, on patiente
+            while(g_machine->acia->GetInputStateReg() == EMPTY){ //EMPTY définit à 0 dans machine/ACIA.h
+                // printf("\ron patiente activement le temps de la reception"); //réecrit sur la même ligne
+            }
+            puts(""); // '\n' formatage du texte de debug en console
+            buff[ind_rec] = g_machine->acia->GetChar();
 
-  //on relache notre envois
-  receive_sema->V();
+            if(buff[ind_rec] == '\0'){ //si on a reçu NULL, alors on s'arrête
+                break;
+            }
 
-  //tout s'est bien passé!
-  return 0;
+            //on incrémente
+            ind_rec++;
+
+        }
+
+        if (buff[BUFFER_SIZE -1] != '\0'){
+            printf("L'envoyeur n'a pas fini par \'0\'. DEFCON -1\n");
+            buff[BUFFER_SIZE - 1] = '\0'; //sécurité
+            //Dans le cas où l'on n'est pas sorti via le break, on a incrémenté ind_rec une fois de trop, donc on le décrémente
+            ind_rec--;
+        }
+
+        //on relache notre reception
+        receive_sema->V();
+
+        //tout s'est bien passé!
+        return ind_rec;
+    } else {
+        printf("on ne supporte pas les interruptions pour le moment");
+        exit(-1);
+    }
 }
 #endif
 
@@ -170,15 +183,14 @@ int DriverACIA::TtyReceive(char* buff,int lg)
 #ifndef ETUDIANTS_TP
 void DriverACIA::InterruptSend()
 {
-  printf("**** Warning: send interrupt handler not implemented yet\n");
-  exit(-1);
+    printf("**** Warning: send interrupt handler not implemented yet\n");
+    exit(-1);
 }
 #endif
 #ifdef ETUDIANTS_TP
 void DriverACIA::InterruptSend()
 {
-  printf("**** Warning: send interrupt handler not implemented yet\n");
-  exit(-1);
+
 }
 #endif
 
@@ -194,8 +206,8 @@ void DriverACIA::InterruptSend()
 #ifndef ETUDIANTS_TP
 void DriverACIA::InterruptReceive()
 {
-  printf("**** Warning: receive interrupt handler not implemented yet\n");
-  exit(-1);
+    printf("**** Warning: receive interrupt handler not implemented yet\n");
+    exit(-1);
 }
 #endif
 #ifdef ETUDIANTS_TP

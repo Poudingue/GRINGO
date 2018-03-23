@@ -4,8 +4,10 @@
 # Please don't update them
 #
 # To add generate a new program, just update the PROGRAMS target below
+PROGRAMS = halt hello shell matmult sort send receive
 
-PROGRAMS = halt hello shell matmult sort
+#permet d'ajouter directement tout les .c de test/, de retirer le ".c" final et de les mettre en ligne
+#PROGRAMS = `ls -l | grep -E ".*\.c$" | rev | cut -d " " -f 1 | rev | cut -d "." -f 1| tr '\n' ' '`
 
 all: $(PROGRAMS)
 
@@ -14,4 +16,3 @@ include $(TOPDIR)/Makefile.user
 
 # Dependances
 $(PROGRAMS): % : $(USERLIB)/sys.o $(USERLIB)/libnachos.o %.o
-

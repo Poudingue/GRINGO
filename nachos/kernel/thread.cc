@@ -314,7 +314,7 @@ Thread::Finish ()
     //si nachos était multiprocesseur, g_thread_to_be_destroyed devrait être une liste à accès critique
    g_thread_to_be_destroyed = this; //c'est un pointeur de thread, CF kernel/system.cc
 
-   g_alive->RemoveItem(this);
+   /**//**///g_alive->RemoveItem(this);
 
    // Go to sleep
    Sleep();  // invokes SWITCH
