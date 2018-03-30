@@ -42,16 +42,18 @@ PageFaultManager::~PageFaultManager() {
 #ifndef ETUDIANTS_TP
 ExceptionType PageFaultManager::PageFault(uint32_t virtualPage)
 {
-  printf("**** Warning: page fault manager is not implemented yet\n");
+    printf("**** Warning: page fault manager is not implemented yet\n");
     exit(-1);
     return ((ExceptionType)0);
 }
 #endif
 #ifdef ETUDIANTS_TP
-ExceptionType PageFaultManager::PageFault(uint32_t virtualPage)
-{
+ExceptionType PageFaultManager::PageFault(uint32_t virtualPage){
     // Get a page in physical memory, halt of there is not sufficient space
-    int pp = g_physical_mem_manager->FindFreePage();
+    //    int pp = /*g_physical_mem_manager*/0->FindFreePage();
+    //TODODO Ce truc qui ne marche pas à cause de droits d'accès
+    //int pp = g_current_thread->GetProcessOwner()->addrspace->FindFreePage();
+    int pp  = AddPhysicalToVirtualMapping(g_current_thread->GetProcessOwner()->addrspace, virtualPage)
     if (pp == -1) {
         printf("Not enough free space to load program %s\n", exec_file->GetName());
         g_machine->interrupt->Halt(-1);
@@ -62,10 +64,10 @@ ExceptionType PageFaultManager::PageFault(uint32_t virtualPage)
     translationTable->setPhysicalPage(virt_page,pp);
 
     if (section_table[i].sh_type != SHT_NOBITS)
-        exec_file->ReadAt((char*)&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), g_cfg->PageSize, section_table[i].sh_offset + pgdisk*g_cfg->PageSize);
+    exec_file->ReadAt((char*)&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), g_cfg->PageSize, section_table[i].sh_offset + pgdisk*g_cfg->PageSize);
     else
-        memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), 0, g_cfg->PageSize);
-        // Fill it with zeroes
+    memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), 0, g_cfg->PageSize);
+    // Fill it with zeroes
     translationTable->setAddrDisk(virt_page,-1);
 
     // The entry is valid

@@ -39,27 +39,27 @@ static void SwapELFSectionHeader (Elf32_Shdr *shdr);
 
 //----------------------------------------------------------------------
 /** 	Create an address space to run a user program.
- //	Load the program from a file "exec_file", and set everything
- //	up so that we can start executing user instructions.
- //
- //      Executables are in ELF (Executable and Linkable Format) (see elf32.h)
- //      and can be generated using a standard MIPS cross-compiler
- //      (here gcc).
- //
- //      For now, the code and data are entirely loaded into memory and
- //      the stacks are preallocated (NB: memory here stands for the
- //      memory of the simulated MIPS machine). Code/Data loading will
- //      be changed in the virtual memory assignment.
- //
- //      Don't look at this code right now. You may get lost. You will
- //      have plenty of time to do so in the virtual memory assignment
- //
- //	\param exec_file is the file containing the object code
- //             to load into memory, or NULL when the address space
- //             should be empty
- //   \param process: process to be executed
- //   \param err: error code 0 if OK, -1 otherwise
- */
+//	Load the program from a file "exec_file", and set everything
+//	up so that we can start executing user instructions.
+//
+//      Executables are in ELF (Executable and Linkable Format) (see elf32.h)
+//      and can be generated using a standard MIPS cross-compiler
+//      (here gcc).
+//
+//      For now, the code and data are entirely loaded into memory and
+//      the stacks are preallocated (NB: memory here stands for the
+//      memory of the simulated MIPS machine). Code/Data loading will
+//      be changed in the virtual memory assignment.
+//
+//      Don't look at this code right now. You may get lost. You will
+//      have plenty of time to do so in the virtual memory assignment
+//
+//	\param exec_file is the file containing the object code
+//             to load into memory, or NULL when the address space
+//             should be empty
+//   \param process: process to be executed
+//   \param err: error code 0 if OK, -1 otherwise
+*/
 //----------------------------------------------------------------------
 
 
@@ -73,8 +73,7 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
     process = p;
 
     /* Empty user address space requested ? */
-    if (exec_file == NULL)
-    {
+    if (exec_file == NULL){
         // Allocate translation table now
         translationTable = new TranslationTable();
         return;
@@ -107,9 +106,8 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
 
     // Compute the highest virtual address to init the translation table
     int mem_topaddr = 0;
-    for (i = 0 ; i < elfHdr.e_shnum ; i++)
-    {
-      // Ignore empty sections
+    for (i = 0 ; i < elfHdr.e_shnum ; i++){
+        // Ignore empty sections
         if (section_table[i].sh_size <= 0)
             continue;
         int section_topaddr = section_table[i].sh_addr + section_table[i].sh_size;
@@ -126,8 +124,7 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
     mem_topaddr);
 
     // Loading of all sections
-    for (i = 0 ; i < elfHdr.e_shnum ; i++)
-    {
+    for (i = 0 ; i < elfHdr.e_shnum ; i++){
         // Retrieve the section name
         const char *section_name = shnames + section_table[i].sh_name;
         DEBUG('a', (char*)"Section %d : size=0x%x name=\"%s\"\n", i, section_table[i].sh_size, section_name);
@@ -140,22 +137,20 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
             continue;
 
         printf(
-          "\t- Section %s : file offset 0x%x, size 0x%x, addr 0x%x, %s%s\n",
-          section_name, (unsigned)section_table[i].sh_offset, (unsigned)section_table[i].sh_size, (unsigned)section_table[i].sh_addr, (section_table[i].sh_flags & SHF_WRITE)?"R/W":"R", (section_table[i].sh_flags & SHF_EXECINSTR)?"/X":""
+            "\t- Section %s : file offset 0x%x, size 0x%x, addr 0x%x, %s%s\n",
+            section_name, (unsigned)section_table[i].sh_offset, (unsigned)section_table[i].sh_size, (unsigned)section_table[i].sh_addr, (section_table[i].sh_flags & SHF_WRITE)?"R/W":"R", (section_table[i].sh_flags & SHF_EXECINSTR)?"/X":""
         );
 
         // Make sure section is aligned on page boundary
         ASSERT((section_table[i].sh_addr % g_cfg->PageSize)==0);
 
-
         // Initializes the page table entries and loads the section
         // in memory (demand paging will be implemented later on)
         for (
-            unsigned int pgdisk = 0, virt_page = section_table[i].sh_addr / g_cfg->PageSize ;
-            pgdisk < divRoundUp(section_table[i].sh_size, g_cfg->PageSize) ;
-            pgdisk++, virt_page ++
+          unsigned int pgdisk = 0, virt_page = section_table[i].sh_addr / g_cfg->PageSize ;
+          pgdisk < divRoundUp(section_table[i].sh_size, g_cfg->PageSize) ;
+          pgdisk++, virt_page ++
         ){
-
 
             /* Without demand paging */
             // Initialization for the page table entry
@@ -163,8 +158,9 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
             translationTable->setBitReadAllowed(virt_page);
             if (section_table[i].sh_flags & SHF_WRITE)
                 translationTable->setBitWriteAllowed(virt_page);
-            else translationTable->clearBitWriteAllowed(virt_page);
-                translationTable->clearBitIo(virt_page);
+            else
+                translationTable->clearBitWriteAllowed(virt_page);
+            translationTable->clearBitIo(virt_page);
 
             //On commence sans défaut de page dans cette version
             #ifndef ETUDIANTS_TP
@@ -187,23 +183,24 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
                 // The section has an image in the executable file
                 // Read it from the disk
                 exec_file->ReadAt((char*)&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), g_cfg->PageSize, section_table[i].sh_offset + pgdisk*g_cfg->PageSize);
-            } else {
+            }else{
                 // The section does not have an image in the executable
-                memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), 0, g_cfg->PageSize);
-                // Fill it with zeroes
+                memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), 0, g_cfg->PageSize); // Fill it with zeroes
             }
-            // The page has been loded in physical memory but
+            // The page has been loaded in physical memory but
             // later-on will be saved in the swap disk. We have to indicate this
             // in the translation table
-            translationTable->setAddrDisk(virt_page,-1);
-
-            // The entry is valid
-            translationTable->setBitValid(virt_page);
+            translationTable->setAddrDisk(virt_page, -1);
+            translationTable->setBitValid(virt_page); // The entry is valid
 
             /* End of code without demand paging */
 
             #endif
             #ifdef ETUDIANTS_TP
+
+
+            translationTable->setAddrDisk(virt_page, -1);
+            translationTable->clearBitValid(virt_page); // The entry is invalid
 
             #endif
         }
@@ -219,90 +216,88 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
 
 //----------------------------------------------------------------------
 /**   Deallocates an address space and in particular frees
- *   all memory it uses (RAM and swap area).
- */
+*   all memory it uses (RAM and swap area).
+*/
 //----------------------------------------------------------------------
-AddrSpace::~AddrSpace()
-{
-  int i;
-
-  if (translationTable != NULL) {
-
-    // For every virtual page
-    for (i = 0 ; i <  freePageId ; i++) {
-
-      // If it is in physical memory, free the physical page
-      if (translationTable->getBitValid(i))
-	g_physical_mem_manager->RemovePhysicalToVirtualMapping(translationTable->getPhysicalPage(i));
-      // If it is in the swap disk, free the corresponding disk sector
-      if (translationTable->getBitSwap(i)) {
-	int addrDisk = translationTable->getAddrDisk(i);
-	if (addrDisk >= 0) {
-	  g_swap_manager->ReleasePageSwap(translationTable->getAddrDisk(i));
-	}
-      }
+AddrSpace::~AddrSpace(){
+    int i;
+    if (translationTable != NULL) {
+        // For every virtual page
+        for (i = 0 ; i <  freePageId ; i++) {
+            // If it is in physical memory, free the physical page
+            if (translationTable->getBitValid(i))
+            g_physical_mem_manager->RemovePhysicalToVirtualMapping(translationTable->getPhysicalPage(i));
+            // If it is in the swap disk, free the corresponding disk sector
+            if (translationTable->getBitSwap(i)) {
+                int addrDisk = translationTable->getAddrDisk(i);
+                if (addrDisk >= 0) {
+                    g_swap_manager->ReleasePageSwap(translationTable->getAddrDisk(i));
+                }
+            }
+        }
+        delete translationTable;
     }
-    delete translationTable;
-  }
 }
 
 //----------------------------------------------------------------------
 /**	Allocates a new stack of size g_cfg->UserStackSize
- *
- *      Allocation is done by calling Alloc, a very simple
- *      allocation procedure of virtual memory areas.
- *
- *      \return stack pointer (at the end of the allocated stack)
- */
+*
+*      Allocation is done by calling Alloc, a very simple
+*      allocation procedure of virtual memory areas.
+*
+*      \return stack pointer (at the end of the allocated stack)
+*/
 //----------------------------------------------------------------------
-int AddrSpace::StackAllocate(void)
-{
-  // Optional : leave an anmapped blank space below the stack to
-  // detect stack overflows
-#define STACK_BLANK_LEN 4 // in pages
-  int blankaddr = this->Alloc(STACK_BLANK_LEN);
-  DEBUG('a', (char*)"Allocated unmapped virtual area [0x%x,0x%x[ for stack overflow detection\n",
-	blankaddr*g_cfg->PageSize, (blankaddr+STACK_BLANK_LEN)*g_cfg->PageSize);
+int AddrSpace::StackAllocate(void){
+    // Optional : leave an anmapped blank space below the stack to
+    // detect stack overflows
+    #define STACK_BLANK_LEN 4 // in pages
+    int blankaddr = this->Alloc(STACK_BLANK_LEN);
+    DEBUG('a', (char*)"Allocated unmapped virtual area [0x%x,0x%x[ for stack overflow detection\n",
+    blankaddr*g_cfg->PageSize, (blankaddr+STACK_BLANK_LEN)*g_cfg->PageSize);
 
-  // The new stack parameters
-  int stackBasePage, numPages;
-  numPages = divRoundUp(g_cfg->UserStackSize, g_cfg->PageSize);
+    // The new stack parameters
+    int stackBasePage, numPages;
+    numPages = divRoundUp(g_cfg->UserStackSize, g_cfg->PageSize);
 
-  // Allocate virtual space for the new stack
-  stackBasePage = this->Alloc(numPages);
-  ASSERT (stackBasePage >= 0);
-  DEBUG('a', (char*)"Allocated virtual area [0x%x,0x%x[ for stack\n",
-	stackBasePage*g_cfg->PageSize,
-	(stackBasePage+numPages)*g_cfg->PageSize);
+    // Allocate virtual space for the new stack
+    stackBasePage = this->Alloc(numPages);
+    ASSERT (stackBasePage >= 0);
+    DEBUG('a', (char*)"Allocated virtual area [0x%x,0x%x[ for stack\n",
+    stackBasePage*g_cfg->PageSize,
+    (stackBasePage+numPages)*g_cfg->PageSize);
 
-  for (int i = stackBasePage ; i < (stackBasePage + numPages) ; i++) {
-    /* Without demand paging */
+    for (int i = stackBasePage ; i < (stackBasePage + numPages) ; i++) {
+        /* Without demand paging */
 
-    // Allocate a new physical page for the stack, halt if not page availabke
-    int pp = g_physical_mem_manager->FindFreePage();
-    if (pp == -1) {
-      printf("Not enough free space to load stack\n");
-      g_machine->interrupt->Halt(-1);
+        // Allocate a new physical page for the stack, halt if not page availabke
+        int pp = g_physical_mem_manager->FindFreePage();
+        if (pp == -1){
+            printf("Not enough free space to load stack\n");
+            g_machine->interrupt->Halt(-1);
+        }
+        g_physical_mem_manager->tpr[pp].virtualPage=i;
+        g_physical_mem_manager->tpr[pp].owner = this;
+        g_physical_mem_manager->tpr[pp].locked=true;
+        translationTable->setPhysicalPage(i,pp);
+
+        // Fill the page with zeroes
+        memset(
+            &(g_machine->mainMemory[translationTable->getPhysicalPage(i)*g_cfg->PageSize]),
+            0x0,
+            g_cfg->PageSize);
+
+        translationTable->setAddrDisk(i, -1);
+        translationTable->setBitValid(i);
+        translationTable->clearBitSwap(i);
+        translationTable->setBitReadAllowed(i);
+        translationTable->setBitWriteAllowed(i);
+        translationTable->clearBitIo(i);
+        /* End of code without demand paging */
     }
-    g_physical_mem_manager->tpr[pp].virtualPage=i;
-    g_physical_mem_manager->tpr[pp].owner = this;
-    g_physical_mem_manager->tpr[pp].locked=true;
-    translationTable->setPhysicalPage(i,pp);
 
-    // Fill the page with zeroes
-    memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(i)*g_cfg->PageSize]),
-	   0x0,g_cfg->PageSize);
-    translationTable->setAddrDisk(i,-1);
-    translationTable->setBitValid(i);
-    translationTable->clearBitSwap(i);
-    translationTable->setBitReadAllowed(i);
-    translationTable->setBitWriteAllowed(i);
-    translationTable->clearBitIo(i);
-    /* End of code without demand paging */
-    }
-
-  int stackpointer = (stackBasePage+numPages)*g_cfg->PageSize - 4*sizeof(int);
-  return stackpointer;
+    int stackpointer = (stackBasePage+numPages)*g_cfg->PageSize - 4*sizeof(int);
+    return stackpointer;
 }
 
 //----------------------------------------------------------------------
@@ -315,50 +310,69 @@ int AddrSpace::StackAllocate(void)
 //----------------------------------------------------------------------
 int AddrSpace::Alloc(int numPages)
 {
-  int result = freePageId;
+    int result = freePageId;
 
-  DEBUG('a', (char*)"Virtual space alloc request for %d pages\n", numPages);
+    DEBUG('a', (char*)"Virtual space alloc request for %d pages\n", numPages);
 
-  // Check if the translation table is big enough for the allocation
-  // to succeed
-  if (freePageId + numPages >= translationTable->getMaxNumPages())
-    return -1;
+    // Check if the translation table is big enough for the allocation
+    // to succeed
+    if (freePageId + numPages >= translationTable->getMaxNumPages())
+        return -1;
 
-  // Do the allocation.
-  // The allocation procedure is VERY SIMPLE. It just remembers
-  // the number of the lastly allocated virtual page and increments it
-  // when new pages are allocated. No de-allocation mechanisms is
-  // implemented.
-  freePageId += numPages;
-  return result;
+    // Do the allocation.
+    // The allocation procedure is VERY SIMPLE. It just remembers
+    // the number of the lastly allocated virtual page and increments it
+    // when new pages are allocated. No de-allocation mechanisms is
+    // implemented.
+    freePageId += numPages;
+    return result;
 }
 
 //----------------------------------------------------------------------
 /** Map an open file in memory
- *
- * \param f: pointer to open file descriptor
- * \param size: size to be mapped in bytes (rounded up to next page boundary)
- * \return the virtual address at which the file is mapped
- */
+*
+* \param f: pointer to open file descriptor
+* \param size: size to be mapped in bytes (rounded up to next page boundary)
+* \return the virtual address at which the file is mapped
+*/
 // ----------------------------------------------------------------------
+#ifndef ETUDIANTS_TP
 int AddrSpace::Mmap(OpenFile *f, int size)
 {
-  printf("**** Warning: method AddrSpace::Mmap is not implemented yet\n");
-  exit(-1);
+    printf("**** Warning: method AddrSpace::Mmap is not implemented yet\n");
+    exit(-1);
 }
+#endif
+#ifdef ETUDIANTS_TP
+//TODODO
+int AddrSpace::Mmap(OpenFile *f, int size)
+{
+    printf("**** Warning: method AddrSpace::Mmap is not implemented yet\n");
+    exit(-1);
+}
+#endif
 
 //----------------------------------------------------------------------
 /*! Search if the address is in a memory-mapped file
- *
- * \param addr: virtual address to be searched for
- * \return address of file descriptor if found, NULL otherwise
- */
+*
+* \param addr: virtual address to be searched for
+* \return address of file descriptor if found, NULL otherwise
+*/
 //----------------------------------------------------------------------
+#ifndef ETUDIANTS_TP
 OpenFile *AddrSpace::findMappedFile(int32_t addr) {
-  printf("**** Warning: method AddrSpace::findMappedFile is not implemented yet\n");
-  exit(-1);
+    printf("**** Warning: method AddrSpace::findMappedFile is not implemented yet\n");
+    exit(-1);
 
 }
+#endif
+#ifdef ETUDIANTS_TP
+OpenFile *AddrSpace::findMappedFile(int32_t addr) {
+    printf("**** Warning: method AddrSpace::findMappedFile is not implemented yet\n");
+    exit(-1);
+
+}
+#endif
 
 //----------------------------------------------------------------------
 // SwapELFHeader
@@ -369,23 +383,22 @@ OpenFile *AddrSpace::findMappedFile(int32_t addr) {
 */
 //----------------------------------------------------------------------
 static void
-SwapELFHeader (Elf32_Ehdr *ehdr)
-{
-  SHORT2HOST(ehdr->e_type);
-  SHORT2HOST(ehdr->e_machine);
+SwapELFHeader (Elf32_Ehdr *ehdr){
+    SHORT2HOST(ehdr->e_type);
+    SHORT2HOST(ehdr->e_machine);
 
-  LONG2HOST(ehdr->e_version);
-  LONG2HOST(ehdr->e_entry);
-  LONG2HOST(ehdr->e_phoff);
-  LONG2HOST(ehdr->e_shoff);
-  LONG2HOST(ehdr->e_flags);
+    LONG2HOST(ehdr->e_version);
+    LONG2HOST(ehdr->e_entry);
+    LONG2HOST(ehdr->e_phoff);
+    LONG2HOST(ehdr->e_shoff);
+    LONG2HOST(ehdr->e_flags);
 
-  SHORT2HOST(ehdr->e_ehsize);
-  SHORT2HOST(ehdr->e_phentsize);
-  SHORT2HOST(ehdr->e_phnum);
-  SHORT2HOST(ehdr->e_shentsize);
-  SHORT2HOST(ehdr->e_shnum);
-  SHORT2HOST(ehdr->e_shstrndx);
+    SHORT2HOST(ehdr->e_ehsize);
+    SHORT2HOST(ehdr->e_phentsize);
+    SHORT2HOST(ehdr->e_phnum);
+    SHORT2HOST(ehdr->e_shentsize);
+    SHORT2HOST(ehdr->e_shnum);
+    SHORT2HOST(ehdr->e_shstrndx);
 }
 
 //----------------------------------------------------------------------
@@ -396,18 +409,17 @@ SwapELFHeader (Elf32_Ehdr *ehdr)
 //
 */
 //----------------------------------------------------------------------
-static void SwapELFSectionHeader (Elf32_Shdr *shdr)
-{
-  LONG2HOST(shdr->sh_name);
-  LONG2HOST(shdr->sh_type);
-  LONG2HOST(shdr->sh_flags);
-  LONG2HOST(shdr->sh_addr);
-  LONG2HOST(shdr->sh_offset);
-  LONG2HOST(shdr->sh_size);
-  LONG2HOST(shdr->sh_link);
-  LONG2HOST(shdr->sh_info);
-  LONG2HOST(shdr->sh_addralign);
-  LONG2HOST(shdr->sh_entsize);
+static void SwapELFSectionHeader (Elf32_Shdr *shdr){
+    LONG2HOST(shdr->sh_name);
+    LONG2HOST(shdr->sh_type);
+    LONG2HOST(shdr->sh_flags);
+    LONG2HOST(shdr->sh_addr);
+    LONG2HOST(shdr->sh_offset);
+    LONG2HOST(shdr->sh_size);
+    LONG2HOST(shdr->sh_link);
+    LONG2HOST(shdr->sh_info);
+    LONG2HOST(shdr->sh_addralign);
+    LONG2HOST(shdr->sh_entsize);
 }
 
 //----------------------------------------------------------------------
@@ -419,66 +431,66 @@ static void SwapELFSectionHeader (Elf32_Shdr *shdr)
 */
 //----------------------------------------------------------------------
 static void
-CheckELFHeader (Elf32_Ehdr *elfHdr, int *err)
-{
-  /* Make sure it is an ELF file by looking at its header (see elf32.h) */
-  if (elfHdr->e_ident[EI_MAG0] != 0x7f ||
-      elfHdr->e_ident[EI_MAG1] != 'E' ||
-      elfHdr->e_ident[EI_MAG2] != 'L' ||
-      elfHdr->e_ident[EI_MAG3] != 'F') {
-      *err = EXEC_FILE_FORMAT_ERROR;
-      return;
+CheckELFHeader (Elf32_Ehdr *elfHdr, int *err){
+    /* Make sure it is an ELF file by looking at its header (see elf32.h) */
+    if (elfHdr->e_ident[EI_MAG0] != 0x7f||
+        elfHdr->e_ident[EI_MAG1] != 'E' ||
+        elfHdr->e_ident[EI_MAG2] != 'L' ||
+        elfHdr->e_ident[EI_MAG3] != 'F') {
+
+        *err = EXEC_FILE_FORMAT_ERROR;
+        return;
     }
 
-  /* Make sure the ELF file type is correct */
-  if (elfHdr->e_ident[EI_CLASS] != ELFCLASS32 ||
-      elfHdr->e_ident[EI_VERSION] != EV_CURRENT) {
-     printf("2\n");
-     *err = EXEC_FILE_FORMAT_ERROR;
-      return;
+    /* Make sure the ELF file type is correct */
+    if (elfHdr->e_ident[EI_CLASS]   != ELFCLASS32 ||
+        elfHdr->e_ident[EI_VERSION] != EV_CURRENT) {
+
+        printf("2\n");
+        *err = EXEC_FILE_FORMAT_ERROR;
+        return;
     }
 
-  /* Check the endianess of the generated code */
-  if (elfHdr->e_ident[EI_DATA] == ELFDATA2MSB) {
-    mips_endianess = IS_BIG_ENDIAN;
-  }
-  else {
-    mips_endianess = IS_LITTLE_ENDIAN;
-  }
-
-  /* Transpose the header so that it can be interpreted by the kernel */
-  SwapELFHeader(elfHdr);
-
-  /* Make sure ELF binary code a MIPS executable */
-  if (elfHdr->e_machine != EM_MIPS ||
-      elfHdr->e_type != ET_EXEC) {
-    *err = EXEC_FILE_FORMAT_ERROR;
-    return;
-  }
-
-  /* Make sure ELF file internal structures are consistent with what
-     we expect */
-  if (elfHdr->e_ehsize != sizeof(Elf32_Ehdr) ||
-      elfHdr->e_shentsize != sizeof(Elf32_Shdr))
-    {
-      *err = EXEC_FILE_FORMAT_ERROR;
-      return;
+    /* Check the endianess of the generated code */
+    if (elfHdr->e_ident[EI_DATA] == ELFDATA2MSB) {
+        mips_endianess = IS_BIG_ENDIAN;
+    }else{
+        mips_endianess = IS_LITTLE_ENDIAN;
     }
 
-  /* Make sure ELF section table is available */
-  if (elfHdr->e_shoff < sizeof(Elf32_Ehdr))
-    {
-      *err = EXEC_FILE_FORMAT_ERROR;
-      return;
+    /* Transpose the header so that it can be interpreted by the kernel */
+    SwapELFHeader(elfHdr);
+
+    /* Make sure ELF binary code a MIPS executable */
+    if (elfHdr->e_machine != EM_MIPS ||
+        elfHdr->e_type    != ET_EXEC) {
+
+        *err = EXEC_FILE_FORMAT_ERROR;
+        return;
     }
 
-  /* Make sure there is a string section name section */
-  if (elfHdr->e_shstrndx >= elfHdr->e_shnum)
-    {
-      *err = EXEC_FILE_FORMAT_ERROR;
-      return;
+    /* Make sure ELF file internal structures are consistent with what
+    we expect */
+    if (elfHdr->e_ehsize    != sizeof(Elf32_Ehdr) ||
+        elfHdr->e_shentsize != sizeof(Elf32_Shdr)) {
+
+        *err = EXEC_FILE_FORMAT_ERROR;
+        return;
     }
 
-  *err = NO_ERROR;
+    /* Make sure ELF section table is available */
+    if (elfHdr->e_shoff < sizeof(Elf32_Ehdr)){
+        *err = EXEC_FILE_FORMAT_ERROR;
+        return;
+    }
+
+    /* Make sure there is a string section name section */
+    if (elfHdr->e_shstrndx >= elfHdr->e_shnum){
+
+        *err = EXEC_FILE_FORMAT_ERROR;
+        return;
+    }
+
+    *err = NO_ERROR;
 
 }
