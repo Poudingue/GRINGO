@@ -88,7 +88,7 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
     ASSERT(*err==NO_ERROR);
     printf("\n****  Loading file %s :\n", exec_file->GetName());
 
-    /* Retrived the contents of section table*/
+    /* Retrieved the contents of section table*/
     Elf32_Shdr section_table[elfHdr.e_shnum*sizeof(elfHdr)];
     exec_file->ReadAt((char *) section_table, elfHdr.e_shnum*sizeof(elfHdr), elfHdr.e_shoff);
     /* Swap the section header */
@@ -147,9 +147,9 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
         // Initializes the page table entries and loads the section
         // in memory (demand paging will be implemented later on)
         for (
-          unsigned int pgdisk = 0, virt_page = section_table[i].sh_addr / g_cfg->PageSize ;
-          pgdisk < divRoundUp(section_table[i].sh_size, g_cfg->PageSize) ;
-          pgdisk++, virt_page ++
+            unsigned int pgdisk = 0, virt_page = section_table[i].sh_addr / g_cfg->PageSize ;
+            pgdisk < divRoundUp(section_table[i].sh_size, g_cfg->PageSize) ;
+            pgdisk++, virt_page ++
         ){
 
             /* Without demand paging */
@@ -197,7 +197,6 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
 
             #endif
             #ifdef ETUDIANTS_TP
-
 
             translationTable->setAddrDisk(virt_page, -1);
             translationTable->clearBitValid(virt_page); // The entry is invalid
@@ -260,8 +259,9 @@ int AddrSpace::StackAllocate(void){
     int stackBasePage, numPages;
     numPages = divRoundUp(g_cfg->UserStackSize, g_cfg->PageSize);
 
-    // Allocate virtual space for the new stack
+    // Allocate virtual space for the new stack.
     stackBasePage = this->Alloc(numPages);
+
     ASSERT (stackBasePage >= 0);
     DEBUG('a', (char*)"Allocated virtual area [0x%x,0x%x[ for stack\n",
     stackBasePage*g_cfg->PageSize,
@@ -270,7 +270,7 @@ int AddrSpace::StackAllocate(void){
     for (int i = stackBasePage ; i < (stackBasePage + numPages) ; i++) {
         /* Without demand paging */
 
-        // Allocate a new physical page for the stack, halt if not page availabke
+        // Allocate a new physical page for the stack, halt if no page available
         int pp = g_physical_mem_manager->FindFreePage();
         if (pp == -1){
             printf("Not enough free space to load stack\n");
@@ -279,7 +279,7 @@ int AddrSpace::StackAllocate(void){
         g_physical_mem_manager->tpr[pp].virtualPage=i;
         g_physical_mem_manager->tpr[pp].owner = this;
         g_physical_mem_manager->tpr[pp].locked=true;
-        translationTable->setPhysicalPage(i,pp);
+        translationTable->setPhysicalPage(i, pp);
 
         // Fill the page with zeroes
         memset(

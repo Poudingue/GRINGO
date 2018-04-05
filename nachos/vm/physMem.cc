@@ -115,15 +115,24 @@ void PhysicalMemManager::ChangeOwner(long numPage, Thread* owner) {
 */
 //-----------------------------------------------------------------
 #ifndef ETUDIANTS_TP
-int PhysicalMemManager::AddPhysicalToVirtualMapping(AddrSpace* owner,int virtualPage){
+int PhysicalMemManager::AddPhysicalToVirtualMapping(AddrSpace* owner, int virtualPage){
     printf("**** Warning: function AddPhysicalToVirtualMapping is not implemented\n");
     exit(-1);
     return (0);
 }
 #endif
 #ifdef ETUDIANTS_TP
-int PhysicalMemManager::AddPhysicalToVirtualMapping(AddrSpace* owner,int virtualPage){
-    return owner->g_physical_mem_manager->FindFreePage();
+int PhysicalMemManager::AddPhysicalToVirtualMapping(AddrSpace* owner, int virtualPage){
+    int temp = owner->translationTable-> ->freePageId;
+    if(temp==-1){
+        temp = owner->Alloc(1);
+        if(temp==-1){
+            fprintf(stderr, "OUT OF MEMORY");
+            fflush(stderr);
+            exit(-1);
+        }
+    }
+    return temp;
 }
 #endif
 

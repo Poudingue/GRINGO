@@ -67,7 +67,7 @@ ExceptionType PageFaultManager::PageFault(uint32_t virtualPage){
     exec_file->ReadAt((char*)&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), g_cfg->PageSize, section_table[i].sh_offset + pgdisk*g_cfg->PageSize);
     else
     memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), 0, g_cfg->PageSize);
-    // Fill it with zeroes
+    // Fill it with -1
     translationTable->setAddrDisk(virt_page,-1);
 
     // The entry is valid

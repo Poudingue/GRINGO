@@ -307,9 +307,6 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr) {
   break;
     }
 
-     //TODODO: à rendre le vendredi 2 mars 8h (2018)
-     //TODODO: les fichiers modifiés (tous) + programme de testing
-     //TODODO: avec en plus un rapport d'avancement
     case SC_SEM_CREATE:{ //d'après page 32, string r4, int r5 et puis semId r2 en retour
         int size;
         int addr;
