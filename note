@@ -1,0 +1,5 @@
+Dans addrspace.cc :
+- Méthodes TranslationTable pratiques
+- setPhysicalPage(virtual address, physical adress)
+- setBitMachin(virtual address) permet de faire machin sur virtual address
+--> On ne peut tripatouiller que les bits des pages virtuelles
