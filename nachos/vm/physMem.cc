@@ -123,16 +123,12 @@ int PhysicalMemManager::AddPhysicalToVirtualMapping(AddrSpace* owner, int virtua
 #endif
 #ifdef ETUDIANTS_TP
 int PhysicalMemManager::AddPhysicalToVirtualMapping(AddrSpace* owner, int virtualPage){
-    int temp = owner->translationTable-> ->freePageId;
-    if(temp==-1){
-        temp = owner->Alloc(1);
-        if(temp==-1){
-            fprintf(stderr, "OUT OF MEMORY");
-            fflush(stderr);
-            exit(-1);
-        }
-    }
-    return temp;
+    //TODODO c'est moche et nul
+    //owner->translationTable->setPhysicalPage(virtualPage, getPhysicalPage(virtualPage));// ->freePageId;
+
+
+    int pp =;
+    return pp;
 }
 #endif
 
@@ -186,6 +182,16 @@ int PhysicalMemManager::EvictPage() {
     printf("**** Warning: page replacement algorithm is not implemented yet\n");
     exit(-1);
     return (0);
+    //te rend un numero de page libre <- cette fonction fait l'algo de l'horloge
+
+    struct tpr_c base = tpr[0];
+    int space = 0;
+    int base_lock = false;
+    for (int j=0; j < owner->TranslationTable->getMaxNumPages(); j++ ){
+        if (tpr[j])
+        base = tpr[j];//TODODO
+    }
+
 }
 #endif
 //-----------------------------------------------------------------

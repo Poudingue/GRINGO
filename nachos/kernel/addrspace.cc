@@ -133,7 +133,7 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
             continue;
 
         // Look if this section has to be loaded (SHF_ALLOC flag)
-        if (! (section_table[i].sh_flags & SHF_ALLOC))
+        if (!(section_table[i].sh_flags & SHF_ALLOC))
             continue;
 
         printf(
@@ -151,15 +151,16 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
             pgdisk < divRoundUp(section_table[i].sh_size, g_cfg->PageSize) ;
             pgdisk++, virt_page ++
         ){
-
             /* Without demand paging */
             // Initialization for the page table entry
             translationTable->clearBitSwap(virt_page);
             translationTable->setBitReadAllowed(virt_page);
+
             if (section_table[i].sh_flags & SHF_WRITE)
                 translationTable->setBitWriteAllowed(virt_page);
             else
                 translationTable->clearBitWriteAllowed(virt_page);
+
             translationTable->clearBitIo(virt_page);
 
             //On commence sans défaut de page dans cette version
@@ -172,7 +173,7 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
                 g_machine->interrupt->Halt(-1);
             }
             g_physical_mem_manager->tpr[pp].virtualPage=virt_page;
-            g_physical_mem_manager->tpr[pp].owner = this;
+            g_physical_mem_manager->tpr[pp].owner =this;
             g_physical_mem_manager->tpr[pp].locked=true;
             translationTable->setPhysicalPage(virt_page,pp);
 
