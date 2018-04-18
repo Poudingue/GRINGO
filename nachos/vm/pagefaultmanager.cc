@@ -52,23 +52,38 @@ ExceptionType PageFaultManager::PageFault(uint32_t virtualPage)
 #ifdef ETUDIANTS_TP
 ExceptionType PageFaultManager::PageFault(uint32_t virtualPage){
 
+/*
+table des pages réelles tpr_c
+nb pages réelles et table de pages g_cfg
+g_current_thread->TranslationTable //tp processus courant
+g_swap_manager
+g_machine->mainMemory memoire machine
+*/
+
     //TODODO faire marcher le truc où le bitswap est à 0 et le setadressdisk different de -1
     // tout ça est dans la mmu global avec translationTable
 
     /* Apparemment il faut tout virer
-
+    */
+    //on recalcul l'offset pgdisk
+    pgdisk = g_current_thread->TranslationTable->getAddrDisk;
+    //on renomme notre virtualPage
+    virt_page = virtualPage;
 
     int pp  = AddPhysicalToVirtualMapping(g_current_thread->GetProcessOwner()->addrspace, virtualPage)
     if (pp == -1) {
-        printf("Not enough free space to load program %s\n", exec_file->GetName());
-        g_machine->interrupt->Halt(-1);
+        printf("Not enough free space to load physical page from virtual page %X\n", virtualPage);
+        //g_machine->interrupt->Halt(-1);
+        pp = EvictPage(); //voir 1.8.2
     }
+    //on met ça dans une page physique/réelle
+    //donc on doit update la tpr
     g_physical_mem_manager->tpr[pp].virtualPage = virt_page;
     g_physical_mem_manager->tpr[pp].owner = this;
     g_physical_mem_manager->tpr[pp].locked= true;
     translationTable->setPhysicalPage(virt_page, pp);
 
-    if (section_table[i].sh_type != SHT_NOBITS)
+    if (/*section_table[i].sh_type != SHT_NOBITS*/)
         exec_file->ReadAt((char*)&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), g_cfg->PageSize, section_table[i].sh_offset + pgdisk*g_cfg->PageSize);
     else
         memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), 0, g_cfg->PageSize);
@@ -78,6 +93,8 @@ ExceptionType PageFaultManager::PageFault(uint32_t virtualPage){
 
     // The entry is valid
     translationTable->setBitValid(virt_page);
-    */
+    /**/
+
+    return NO_EXCEPTION;
 }
 #endif

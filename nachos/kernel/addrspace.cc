@@ -199,7 +199,8 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
             #endif
             #ifdef ETUDIANTS_TP
 
-            translationTable->setAddrDisk(virt_page, -1);
+            translationTable->setAddrDisk(virt_page, (char*)&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]));
+            //on met les addresses disques dans les adresses virtuelles pour traiter le défaut de page
             translationTable->clearBitValid(virt_page); // The entry is invalid
 
             #endif
@@ -270,9 +271,10 @@ int AddrSpace::StackAllocate(void){
 
     for (int i = stackBasePage ; i < (stackBasePage + numPages) ; i++) {
         /* Without demand paging */
-
+    #ifndef ETUDIANTS_TP
         // Allocate a new physical page for the stack, halt if no page available
         int pp = g_physical_mem_manager->FindFreePage();
+
         if (pp == -1){
             printf("Not enough free space to load stack\n");
             g_machine->interrupt->Halt(-1);
@@ -288,13 +290,44 @@ int AddrSpace::StackAllocate(void){
             0x0,
             g_cfg->PageSize);
 
+
         translationTable->setAddrDisk(i, -1);
         translationTable->setBitValid(i);
         translationTable->clearBitSwap(i);
         translationTable->setBitReadAllowed(i);
         translationTable->setBitWriteAllowed(i);
         translationTable->clearBitIo(i);
-        /* End of code without demand paging */
+        #endif
+        #ifdef ETUDIANTS_TP
+        //TODODO int pp = notre fonction voleur de page
+        if (pp == -1){
+            printf("Not enough free space to load stack\n");
+            g_machine->interrupt->Halt(-1);
+        }
+        g_physical_mem_manager->tpr[pp].virtualPage=i;
+        g_physical_mem_manager->tpr[pp].owner = this;
+        g_physical_mem_manager->tpr[pp].locked=true;
+        translationTable->setPhysicalPage(i, pp);
+
+        // Fill the page with zeroes
+        memset(
+            &(g_machine->mainMemory[translationTable->getPhysicalPage(i)*g_cfg->PageSize]),
+            0x0,
+            g_cfg->PageSize);
+
+            translationTable->setAddrDisk(i, -1);
+            //quand un défaut de page se présentera, on trouvera une page avec
+            //findfreepage mais avec notre algo horloge et on la memsetra
+
+            //translationTable->setBitValid(i);
+            translationTable->clearBitValid(i);
+            translationTable->clearBitSwap(i);
+            translationTable->setBitReadAllowed(i);
+            translationTable->setBitWriteAllowed(i);
+            translationTable->clearBitIo(i);
+            /* End of code without demand paging */
+
+        #endif
     }
 
     int stackpointer = (stackBasePage+numPages)*g_cfg->PageSize - 4*sizeof(int);
