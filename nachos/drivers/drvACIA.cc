@@ -190,7 +190,8 @@ void DriverACIA::InterruptSend()
 #ifdef ETUDIANTS_TP
 void DriverACIA::InterruptSend()
 {
-
+    printf("**** Warning: receive interrupt handler not implemented yet\n");
+    exit(-1);
 }
 #endif
 
@@ -213,6 +214,7 @@ void DriverACIA::InterruptReceive()
 #ifdef ETUDIANTS_TP
 void DriverACIA::InterruptReceive()
 {
-
+    printf("**** Warning: receive interrupt handler not implemented yet\n");
+    exit(-1);
 }
 #endif
